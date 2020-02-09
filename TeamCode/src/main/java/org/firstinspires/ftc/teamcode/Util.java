@@ -59,7 +59,7 @@ public class Util {
     int ALL_THRESH = 15;
     int TURNTHRESH = 30;
     public enum Exit { DontExit, ExitState, NoTimeLeftExit}
-    private final int EXIT_TIME_THRESHOLD = 10;
+    private final int EXIT_TIME_THRESHOLD = 20;
     private int BackWallDistance = 28;
     int TargetPosition;
     static private String mySkyStonePos;
@@ -130,6 +130,7 @@ public class Util {
         if (BackDistance.getDistance(DistanceUnit.INCH) >= 15){
             return Exit.ExitState;
         }
+
 
         return Exit.DontExit;
 

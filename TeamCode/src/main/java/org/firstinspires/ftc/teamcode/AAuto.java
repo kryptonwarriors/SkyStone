@@ -79,8 +79,6 @@ public class AAuto extends OpMode {
     private static ElapsedTime runtime = new ElapsedTime();
     private Util autoUility;
 
-
-
     private static DcMotor LeftForward = null;
     private static DcMotor LeftBack = null;
     private static DcMotor RightForward = null;
@@ -136,10 +134,6 @@ public class AAuto extends OpMode {
     Mat input = new Mat();
     List<MatOfPoint> contoursList = new ArrayList<>();
 
-
-
-
-
     private ColorSensor Color;
     private Blinker Control_Hub;
     private Blinker Expansion_Hub;
@@ -161,6 +155,8 @@ public class AAuto extends OpMode {
     int THRESH = 15;
     int ALL_THRESH = 15;
     int TURNTHRESH = 30;
+    final double OPTIMUM_POWER = 0.4;
+    final double STRAFE_POWER = 0.6;
 
     public static ElapsedTime timer = new ElapsedTime();
 
@@ -320,12 +316,10 @@ public class AAuto extends OpMode {
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         imu.initialize(imuParameters);
 
-
         LeftForward = hardwareMap.dcMotor.get("LeftForward");
         RightForward = hardwareMap.dcMotor.get("RightForward");
         LeftBack = hardwareMap.dcMotor.get("LeftBack");
         RightBack = hardwareMap.dcMotor.get("RightBack");
-
 
         LinearActuator = hardwareMap.dcMotor.get("LinearActuator");
         LeftCascade = hardwareMap.dcMotor.get("LeftCascade");
@@ -336,7 +330,6 @@ public class AAuto extends OpMode {
         RFBumper = hardwareMap.get(RevTouchSensor.class, "RFBumper");
         LBBumper = hardwareMap.get(RevTouchSensor.class, "LBBumper");
         RBBumper = hardwareMap.get(RevTouchSensor.class, "RBBumper");
-
 
         LeftFoundation = hardwareMap.servo.get("LeftFoundation");
         RightFoundation = hardwareMap.servo.get("RightFoundation");
@@ -358,7 +351,6 @@ public class AAuto extends OpMode {
         LeftFoundation.setPosition(0.80);
         RightFoundation.setPosition(0.22);
 
-
         telemetry.addData("Status", "Initialized");
         telemetry.update();
     }
@@ -368,11 +360,10 @@ public class AAuto extends OpMode {
      */
     @Override
     public void init_loop() {
+
         if (webcam == null) {
             int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-
             webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);        //phoneCam = new OpenCvInternalCamera(OpenCvInternalCamera.CameraDirection.BACK, cameraMonitorViewId);//remove this
-
             webcam.openCameraDevice();//open camera
             telemetry.addData("Camera Opened", "");
             telemetry.update();
@@ -386,23 +377,25 @@ public class AAuto extends OpMode {
             } else if (valRight == 0){
                 SkyStonePos = "Right";
             }
-            telemetry.addData("Values", valLeft+"   "+valMid+"   "+valRight);
-            telemetry.addData("SkyStonePos",SkyStonePos);
-            telemetry.addData("LeftDistance", LeftDistance.getDistance(DistanceUnit.INCH));
-            telemetry.addData("RightDistance", RightDistance.getDistance(DistanceUnit.INCH));
-            telemetry.addData("BackDistance", BackDistance.getDistance(DistanceUnit.INCH));
         }
 
-
-
+        if  ( !imu.isGyroCalibrated() ) {
+            telemetry.addData(">", "calibrating");
+        }
+        else {
+            telemetry.addData(">", "calibration done");
+        }
+        telemetry.addData("Values", valLeft+"   "+valMid+"   "+valRight);
+        telemetry.addData("SkyStonePos",SkyStonePos);
+        telemetry.addData("LeftDistance", LeftDistance.getDistance(DistanceUnit.INCH));
+        telemetry.addData("RightDistance", RightDistance.getDistance(DistanceUnit.INCH));
+        telemetry.addData("BackDistance", BackDistance.getDistance(DistanceUnit.INCH));
         telemetry.update();
     }
-
 
 
     private void StartMotors(int Direction,  double Power)
     {
-
         LeftForward.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         RightForward.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         LeftBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -454,84 +447,66 @@ public class AAuto extends OpMode {
         }
     }
 
-    private void Encoder_Function(int Direction, int TargetPosition, double Power)
+    private void DriveWithPID(int direction, double power)
+    {
+        if (direction == LEFT) {
+            correction = pidDrive.performPID(getAngle());
+            LeftForward.setPower(power+correction);
+            LeftBack.setPower(-power+correction);
+            RightForward.setPower(power-correction);
+            RightBack.setPower(-power-correction);
+        }
+        else if (direction == RIGHT) {
+            correction = pidDrive.performPID(getAngle());
+            LeftForward.setPower(-power-correction);
+            LeftBack.setPower(power-correction);
+            RightForward.setPower(-power+correction);
+            RightBack.setPower(power+correction);
+        }
+        else if (direction == FORWARD) {
+            correction = pidDrive.performPID(getAngle());
+            RightForward.setPower(power+correction);
+            LeftBack.setPower(-power-correction);
+            LeftForward.setPower(-power-correction);
+            RightBack.setPower(power+correction);
+        }
+        else if (direction == BACKWARD) {
+            correction = pidDrive.performPID(getAngle());
+            RightForward.setPower(-power-correction);
+            LeftBack.setPower(power+correction);
+            LeftForward.setPower(power+correction);
+            RightBack.setPower(-power-correction);
+        }
+        telemetry.addData("correction", correction);
+        telemetry.addData("LeftForward", LeftForward.getPower());
+        telemetry.addData("RightForward", RightForward.getPower());
+        telemetry.addData("LeftBack", LeftBack.getPower());
+        telemetry.addData("RightBack", RightBack.getPower());
+        telemetry.update();
+    }
+
+    /**
+     * Get current cumulative angle rotation from last reset.
+     * @return Angle in degrees. + = left, - = right from zero point.
+     */
+    private double getAngle()
     {
 
-        LeftForward.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        RightForward.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        LeftBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        RightBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        Orientation angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
 
-        LeftForward.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        RightForward.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        LeftBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        RightBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        double deltaAngle = angles.firstAngle - lastAngles.firstAngle;
 
-        THRESH = ALL_THRESH;
-        if (Direction == FORWARD) {
-            RightForward.setPower(Power);
-            LeftBack.setPower(-Power);
-            LeftForward.setPower(-Power);
-            RightBack.setPower(Power);
-        }
-        else if (Direction == BACKWARD) {
-            RightForward.setPower(-Power);
-            LeftBack.setPower(Power);
-            LeftForward.setPower(Power);
-            RightBack.setPower(-Power);
-        }
-        else if (Direction == LEFT) {
-            LeftForward.setPower(Power);
-            LeftBack.setPower(-Power);
-            RightForward.setPower(Power);
-            RightBack.setPower(-Power);
-        }
-        else if (Direction == RIGHT) {
-            LeftForward.setPower(-Power);
-            LeftBack.setPower(Power);
-            RightForward.setPower(-Power);
-            RightBack.setPower(Power);
-        }
-        else if (Direction == RTurn) {
-            THRESH = TURNTHRESH;
-            LeftForward.setPower(-Power);
-            LeftBack.setPower(-Power);
-            RightForward.setPower(-Power);
-            RightBack.setPower(-Power);
-        }
-        else if (Direction == LTurn) {
-            THRESH = TURNTHRESH;
-            LeftForward.setPower(Power);
-            LeftBack.setPower(Power);
-            RightForward.setPower(Power);
-            RightBack.setPower(Power);
-        }
+        if (deltaAngle < -180)
+            deltaAngle += 360;
+        else if (deltaAngle > 180)
+            deltaAngle -= 360;
 
-        while ( ( (Math.abs(Math.abs(LeftForward.getCurrentPosition()) - Math.abs(TargetPosition)) > THRESH)) )
+        globalAngle += deltaAngle;
 
-        {
-            telemetry.addData("Direction", Direction);
-            telemetry.addData("key", "moving");
-            telemetry.addData("LFCurrentPosition", LeftForward.getCurrentPosition());
-            telemetry.addData("LFTargetPosition", -TargetPosition);
-            telemetry.addData("RFCurrentPosition", RightForward.getCurrentPosition());
-            telemetry.addData("RFTargetPosition", TargetPosition);
-            telemetry.addData("LBCurrentPosition", LeftBack.getCurrentPosition());
-            telemetry.addData("LBTargetPosition", TargetPosition);
-            telemetry.addData("RBCurrentPosition", RightBack.getCurrentPosition());
-            telemetry.addData("RBTargetPosition", -TargetPosition);
-            telemetry.update();
-        }
+        lastAngles = angles;
 
-        LeftBack.setPower(0.0);
-        LeftForward.setPower(0.0);
-        RightForward.setPower(0.0);
-        RightBack.setPower(0.0);
-        telemetry.addData("Zero", "Motors stopped");
-        telemetry.update();
-    } // End of function
-
-
+        return globalAngle;
+    }
 
     private void StopDrive()
     {
@@ -541,22 +516,7 @@ public class AAuto extends OpMode {
         RightBack.setPower(0.0);
     }
 
-    private void moveUntilBackBumper (double Power) {
-        RightForward.setPower(-Power);
-        LeftBack.setPower(Power);
-        LeftForward.setPower(Power);
-        RightBack.setPower(-Power);
-        while (! (LBBumper.isPressed() || RBBumper.isPressed())  ) {
-            telemetry.addData("LeftBackBumper", LBBumper.isPressed());
-            telemetry.addData("RightBackBumper", RBBumper.isPressed());
-            telemetry.update();
-        }
-        StopDrive();
-    }
-
-
-
-    /*
+        /*
      * Code to run ONCE when the driver hits PLAY
      */
     @Override
@@ -581,25 +541,29 @@ public class AAuto extends OpMode {
             case INIT:
                 timer.reset();
                 if (SkyStonePos.equals("Left")) {
-                    StartMotors(LEFT, 0.4);
+                    StartMotors(LEFT, STRAFE_POWER);
                 } else if (SkyStonePos.equals("Right")) {
-                    StartMotors(RIGHT, 0.4);
+                    StartMotors(RIGHT, STRAFE_POWER);
                 } else if (SkyStonePos.equals("Center")) {
 
                 }
-
                 CurrentState = RobotState.POSITION_TO_SKYSTONE;
                 break;
+
             case POSITION_TO_SKYSTONE:
                 ES = autoUility.CanIExitPositionToSkyStone();
                 if (ES == Util.Exit.ExitState) {
                     StopDrive();
-                    StartMotors(FORWARD, 0.4);
+                    StartMotors(FORWARD, OPTIMUM_POWER);
                     CurrentState = RobotState.GO_TO_SKYSTONE;
                 } else if (ES == Util.Exit.NoTimeLeftExit) {
                     CurrentState = RobotState.GO_TO_FOUNDATION;
                 } else if (ES == Util.Exit.DontExit) {
-
+                    if (SkyStonePos.equals("Left")) {
+                        DriveWithPID(LEFT, OPTIMUM_POWER);
+                    } else if (SkyStonePos.equals("Right")) {
+                        DriveWithPID(RIGHT, OPTIMUM_POWER);
+                    }
                 }
                 telemetry.addData("CurrentState", "POSITION_TO_SKYSTONE");
                 telemetry.addData("LeftDistance", LeftDistance.getDistance(DistanceUnit.INCH));
@@ -613,10 +577,10 @@ public class AAuto extends OpMode {
                     StopDrive();
                     CurrentState = RobotState.PICK_UP_STONE;
                 } else if (ES == Util.Exit.NoTimeLeftExit) {
-                    StartMotors(RIGHT, 0.8);
-                    CurrentState = RobotState.WAIT;
+                    StartMotors(RIGHT, OPTIMUM_POWER);
+                    CurrentState = RobotState.GO_TO_FOUNDATION;
                 } else if (ES == Util.Exit.DontExit) {
-
+                    DriveWithPID(FORWARD, OPTIMUM_POWER);
                 }
                 telemetry.addData("CurrentState", "GO_TO_SKYSTONE");
                 telemetry.addData("LeftDistance", LeftDistance.getDistance(DistanceUnit.INCH));
@@ -627,7 +591,7 @@ public class AAuto extends OpMode {
                 ES = autoUility.CanIExitWait();
                 if (ES == Util.Exit.ExitState) {
                     StopDrive();
-                    StartMotors(BACKWARD, 0.4);
+                    StartMotors(BACKWARD, OPTIMUM_POWER);
                     timer.reset();
                     CurrentState = RobotState.GO_TO_FOUNDATION;
                 } else if(ES == Util.Exit.NoTimeLeftExit) {
@@ -642,7 +606,7 @@ public class AAuto extends OpMode {
                 ES = autoUility.CanIExitPickUpStone();
                 if (ES == Util.Exit.ExitState) {
                     StopDrive();
-                    StartMotors(RIGHT, 0.4);
+                    StartMotors(RIGHT, OPTIMUM_POWER);
                     timer.reset();
                     CurrentState = RobotState.GO_TO_FOUNDATION;
                 } else if(ES == Util.Exit.NoTimeLeftExit) {
@@ -665,7 +629,7 @@ public class AAuto extends OpMode {
                     StopDrive();
                     CurrentState = RobotState.FOUNDATION_ARM_DOWN;
                 } else if(ES == Util.Exit.DontExit) {
-
+                    DriveWithPID(RIGHT, OPTIMUM_POWER);
                 }
                 telemetry.addData("CurrentState", "GO_TO_FOUNDATION");
                 telemetry.addData("LeftDistance", LeftDistance.getDistance(DistanceUnit.INCH));
@@ -696,11 +660,11 @@ public class AAuto extends OpMode {
         }
 
 
-        /*
-         * Code to run ONCE after the driver hits STOP
-         */
-        @Override
-        public void stop () {
-        }
+    /*
+     * Code to run ONCE after the driver hits STOP
+     */
+    @Override
+    public void stop () {
+    }
 
     }
