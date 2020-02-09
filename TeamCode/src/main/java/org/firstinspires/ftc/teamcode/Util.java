@@ -162,7 +162,7 @@ public class Util {
         if (myRunTime.seconds() > EXIT_TIME_THRESHOLD) {
             return Exit.NoTimeLeftExit;
         }
-        if (RightDistance.getDistance(DistanceUnit.INCH) <= 30) {
+        if (RightDistance.getDistance(DistanceUnit.INCH) <= 30 && LeftForward.getCurrentPosition() >= 1700) {
             return Exit.ExitState;
         }
 

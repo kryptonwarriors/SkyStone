@@ -155,7 +155,7 @@ public class AAuto extends OpMode {
     int THRESH = 15;
     int ALL_THRESH = 15;
     int TURNTHRESH = 30;
-    final double OPTIMUM_POWER = 0.4;
+    final double OPTIMUM_POWER = 0.3;
     final double STRAFE_POWER = 0.6;
 
     public static ElapsedTime timer = new ElapsedTime();
@@ -452,15 +452,15 @@ public class AAuto extends OpMode {
         if (direction == LEFT) {
             correction = pidDrive.performPID(getAngle());
             LeftForward.setPower(power+correction);
-            LeftBack.setPower(-power+correction);
-            RightForward.setPower(power-correction);
+            LeftBack.setPower(-power-correction);
+            RightForward.setPower(power+correction);
             RightBack.setPower(-power-correction);
         }
         else if (direction == RIGHT) {
             correction = pidDrive.performPID(getAngle());
             LeftForward.setPower(-power-correction);
-            LeftBack.setPower(power-correction);
-            RightForward.setPower(-power+correction);
+            LeftBack.setPower(power+correction);
+            RightForward.setPower(-power-correction);
             RightBack.setPower(power+correction);
         }
         else if (direction == FORWARD) {
@@ -608,6 +608,7 @@ public class AAuto extends OpMode {
                     StopDrive();
                     StartMotors(RIGHT, OPTIMUM_POWER);
                     timer.reset();
+                    LeftForward.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                     CurrentState = RobotState.GO_TO_FOUNDATION;
                 } else if(ES == Util.Exit.NoTimeLeftExit) {
                     StopDrive();
@@ -646,11 +647,12 @@ public class AAuto extends OpMode {
                     StopDrive();
                     CurrentState = RobotState.FOUNDATION_ARM_DOWN;
                 } else if (ES == Util.Exit.DontExit) {
-
+                    telemetry.addData("CurrentState", "ARM_DOWN");
+                    telemetry.addData("LeftDistance", LeftDistance.getDistance(DistanceUnit.INCH));
+                    telemetry.addData("RightDistance", RightDistance.getDistance(DistanceUnit.INCH));
+                    telemetry.update();
                 }
-                telemetry.addData("CurrentState", "ARM_DOWN");
-                telemetry.addData("LeftDistance", LeftDistance.getDistance(DistanceUnit.INCH));
-                telemetry.update();
+
                 break;
 
             case END:
