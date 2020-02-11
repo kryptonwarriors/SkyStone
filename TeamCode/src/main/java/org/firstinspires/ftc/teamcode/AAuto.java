@@ -156,7 +156,7 @@ public class AAuto extends OpMode {
     int ALL_THRESH = 15;
     int TURNTHRESH = 30;
     final double OPTIMUM_POWER = 0.3;
-    final double STRAFE_POWER = 0.6;
+    final double STRAFE_POWER = 0.7;
 
     public static ElapsedTime timer = new ElapsedTime();
 
@@ -449,33 +449,33 @@ public class AAuto extends OpMode {
 
     private void DriveWithPID(int direction, double power)
     {
-        if (direction == LEFT) {
+        if (direction == RIGHT) {
             correction = pidDrive.performPID(getAngle());
-            LeftForward.setPower(power+correction);
-            LeftBack.setPower(-power-correction);
-            RightForward.setPower(power+correction);
-            RightBack.setPower(-power-correction);
+            LeftForward.setPower(-power+correction);
+            LeftBack.setPower(power-correction);
+            RightForward.setPower(-power+correction);
+            RightBack.setPower(power-correction);
         }
-        else if (direction == RIGHT) {
+        else if (direction == LEFT) {
             correction = pidDrive.performPID(getAngle());
-            LeftForward.setPower(-power-correction);
-            LeftBack.setPower(power+correction);
-            RightForward.setPower(-power-correction);
-            RightBack.setPower(power+correction);
-        }
-        else if (direction == FORWARD) {
-            correction = pidDrive.performPID(getAngle());
-            RightForward.setPower(power+correction);
-            LeftBack.setPower(-power-correction);
-            LeftForward.setPower(-power-correction);
-            RightBack.setPower(power+correction);
+            LeftForward.setPower(power-correction);
+            LeftBack.setPower(-power+correction);
+            RightForward.setPower(power-correction);
+            RightBack.setPower(-power+correction);
         }
         else if (direction == BACKWARD) {
             correction = pidDrive.performPID(getAngle());
-            RightForward.setPower(-power-correction);
-            LeftBack.setPower(power+correction);
-            LeftForward.setPower(power+correction);
-            RightBack.setPower(-power-correction);
+            RightForward.setPower(-power+correction);
+            LeftBack.setPower(power-correction);
+            LeftForward.setPower(power-correction);
+            RightBack.setPower(-power+correction);
+        }
+        else if (direction == FORWARD) {
+            correction = pidDrive.performPID(getAngle());
+            RightForward.setPower(power-correction);
+            LeftBack.setPower(-power+correction);
+            LeftForward.setPower(-power+correction);
+            RightBack.setPower(power-correction);
         }
         telemetry.addData("correction", correction);
         telemetry.addData("LeftForward", LeftForward.getPower());
@@ -523,7 +523,7 @@ public class AAuto extends OpMode {
     public void start() {
 
         runtime.reset();
-        pidDrive = new PIDController(0.05, 0, 0);
+        pidDrive = new PIDController(0.04, 0, 0);
         pidDrive.setSetpoint(0);
         pidDrive.setInputRange(-90, 90);
         pidDrive.enable();
