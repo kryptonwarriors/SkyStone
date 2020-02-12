@@ -155,8 +155,8 @@ public class AAuto extends OpMode {
     int THRESH = 15;
     int ALL_THRESH = 15;
     int TURNTHRESH = 30;
-    final double OPTIMUM_POWER = 0.3;
-    final double STRAFE_POWER = 0.7;
+    double OPTIMUM_POWER = 0.4;
+    double STRAFE_POWER = 0.8;
 
     public static ElapsedTime timer = new ElapsedTime();
 
@@ -496,9 +496,9 @@ public class AAuto extends OpMode {
 
         double deltaAngle = angles.firstAngle - lastAngles.firstAngle;
 
-        if (deltaAngle < -180)
+        if (deltaAngle < -90)
             deltaAngle += 360;
-        else if (deltaAngle > 180)
+        else if (deltaAngle > 90)
             deltaAngle -= 360;
 
         globalAngle += deltaAngle;
@@ -540,6 +540,7 @@ public class AAuto extends OpMode {
 
             case INIT:
                 timer.reset();
+                pidDrive.reset();
                 if (SkyStonePos.equals("Left")) {
                     StartMotors(LEFT, STRAFE_POWER);
                 } else if (SkyStonePos.equals("Right")) {
@@ -551,8 +552,9 @@ public class AAuto extends OpMode {
                 break;
 
             case POSITION_TO_SKYSTONE:
+                pidDrive.reset();
                 ES = autoUility.CanIExitPositionToSkyStone();
-                if (ES == Util.Exit.ExitState) {
+                if (ES == Util.Exit.ExitState && LeftDistance.getDistance(DistanceUnit.INCH) >= 50) {
                     StopDrive();
                     StartMotors(FORWARD, OPTIMUM_POWER);
                     CurrentState = RobotState.GO_TO_SKYSTONE;
@@ -561,8 +563,10 @@ public class AAuto extends OpMode {
                 } else if (ES == Util.Exit.DontExit) {
                     if (SkyStonePos.equals("Left")) {
                         DriveWithPID(LEFT, OPTIMUM_POWER);
+                        CurrentState = RobotState.GO_TO_SKYSTONE;
                     } else if (SkyStonePos.equals("Right")) {
                         DriveWithPID(RIGHT, OPTIMUM_POWER);
+                        CurrentState = RobotState.GO_TO_SKYSTONE;
                     }
                 }
                 telemetry.addData("CurrentState", "POSITION_TO_SKYSTONE");
@@ -572,9 +576,11 @@ public class AAuto extends OpMode {
                 break;
 
             case GO_TO_SKYSTONE:
+                pidDrive.reset();
                 ES = autoUility.CanIExitGoToSkyStone();
                 if (ES == Util.Exit.ExitState) {
                     StopDrive();
+                    StartMotors(FORWARD, OPTIMUM_POWER);
                     CurrentState = RobotState.PICK_UP_STONE;
                 } else if (ES == Util.Exit.NoTimeLeftExit) {
                     StartMotors(RIGHT, OPTIMUM_POWER);
@@ -588,6 +594,7 @@ public class AAuto extends OpMode {
 
                 break;
             case WAIT:
+                pidDrive.reset();
                 ES = autoUility.CanIExitWait();
                 if (ES == Util.Exit.ExitState) {
                     StopDrive();
@@ -602,7 +609,10 @@ public class AAuto extends OpMode {
                 }
                 telemetry.addData("CurrentState", "WAIT");
                 telemetry.update();
+
             case PICK_UP_STONE:
+                StopDrive();
+                pidDrive.reset();
                 ES = autoUility.CanIExitPickUpStone();
                 if (ES == Util.Exit.ExitState) {
                     StopDrive();
@@ -620,7 +630,9 @@ public class AAuto extends OpMode {
                 telemetry.addData("LeftDistance", LeftDistance.getDistance(DistanceUnit.INCH));
                 telemetry.update();
                 break;
+
             case GO_TO_FOUNDATION:
+                pidDrive.reset();
                 ES = autoUility.CanIExitGoToFoundation();
                 if (ES == Util.Exit.ExitState) {
                     StopDrive();
@@ -638,6 +650,7 @@ public class AAuto extends OpMode {
                 break;
 
             case ARM_DOWN:
+                pidDrive.reset();
                 ES = autoUility.CanIExitArmDown();
                 if (ES == Util.Exit.ExitState) {
                     StopDrive();

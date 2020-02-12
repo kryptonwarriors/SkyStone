@@ -109,11 +109,10 @@ public class Util {
                 return Exit.ExitState;
             }
 
-        } else if (mySkyStonePos == "Right") {
+        } else if (mySkyStonePos == "Right" && LeftDistance.getDistance(DistanceUnit.INCH) >= 50) {
 
-            if (LeftDistance.getDistance(DistanceUnit.INCH) >= 40){
-                return Exit.ExitState;
-            }
+            return Exit.ExitState;
+
 
         } else if (mySkyStonePos == "Center") {
             return Exit.ExitState;
