@@ -377,6 +377,7 @@ public class AAuto extends OpMode {
                 SkyStonePos = "Center";
             } else if (valRight == 0){
                 SkyStonePos = "Right";
+
             }
         }
 
