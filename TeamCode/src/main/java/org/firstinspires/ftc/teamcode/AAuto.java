@@ -453,33 +453,33 @@ public class AAuto extends OpMode {
         if (direction == RIGHT) {
             correction = pidDrive.performPID(getAngle());
             LeftForward.setPower(-power - correction);
-            LeftBack.setPower(power + correction);
-            RightForward.setPower(-power + correction);
+            LeftBack.setPower(power - correction);
+            RightForward.setPower(-power - correction);
             RightBack.setPower(power - correction);
 
         }
         else if (direction == LEFT) {
             correction = pidDrive.performPID(getAngle());
-            LeftForward.setPower(power + correction);
+            LeftForward.setPower(power - correction);
             LeftBack.setPower(-power - correction);
             RightForward.setPower(power - correction);
-            RightBack.setPower(-power + correction);
+            RightBack.setPower(-power - correction);
 
         }
         else if (direction == BACKWARD) {
             correction = pidDrive.performPID(getAngle());
             RightForward.setPower(-power - correction);
-            LeftBack.setPower(power + correction);
-            LeftForward.setPower(power + correction);
+            LeftBack.setPower(power - correction);
+            LeftForward.setPower(power - correction);
             RightBack.setPower(-power - correction);
 
         }
         else if (direction == FORWARD) {
             correction = pidDrive.performPID(getAngle());
-            RightForward.setPower(power + correction);
+            RightForward.setPower(power - correction);
             LeftBack.setPower(-power - correction);
             LeftForward.setPower(-power - correction);
-            RightBack.setPower(power + correction);
+            RightBack.setPower(power - correction);
 
         }
 
@@ -544,9 +544,9 @@ public class AAuto extends OpMode {
                 stateTimer.reset();
                 pidDrive.reset();
                 if (SkyStonePos.equals("Left")) {
-                    StartMotors(LEFT, STRAFE_POWER);
+                    DriveWithPID(LEFT, STRAFE_POWER);
                 } else if (SkyStonePos.equals("Right")) {
-                    StartMotors(RIGHT, STRAFE_POWER);
+                    DriveWithPID(RIGHT, STRAFE_POWER);
                 } else if (SkyStonePos.equals("Center")) {
 
                 }
@@ -558,7 +558,7 @@ public class AAuto extends OpMode {
                 ES = CanIExitPositionToSkyStone();
                 if (ES == Util.Exit.ExitState) {
                     StopDrive();
-                    StartMotors(FORWARD, OPTIMUM_POWER);
+                    DriveWithPID(FORWARD, OPTIMUM_POWER);
                     CurrentState = RobotState.GO_TO_SKYSTONE;
                 } else if (ES == Util.Exit.NoTimeLeftExit) {
                     telemetry.addData("Exiting Out with No Time", "");
@@ -587,7 +587,7 @@ public class AAuto extends OpMode {
                     CurrentState = RobotState.PICK_UP_STONE;
                 } else if (ES == Util.Exit.NoTimeLeftExit) {
                     telemetry.addData("Exiting Out with No Time", "");
-                    StartMotors(RIGHT, OPTIMUM_POWER);
+                    DriveWithPID(RIGHT, OPTIMUM_POWER);
                     CurrentState = RobotState.GO_TO_FOUNDATION;
                 } else if (ES == Util.Exit.DontExit) {
 
@@ -608,7 +608,7 @@ public class AAuto extends OpMode {
                 pidDrive.reset();
                 ES = autoUility.CanIExitPickUpStone();
                 if (ES == Util.Exit.ExitState) {
-                    StartMotors(RIGHT, OPTIMUM_POWER);
+                    DriveWithPID(RIGHT, OPTIMUM_POWER);
                     CurrentState = RobotState.GO_TO_FOUNDATION;
                 } else if(ES == Util.Exit.NoTimeLeftExit) {
                     StopDrive();
