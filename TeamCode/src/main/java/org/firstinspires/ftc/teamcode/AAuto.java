@@ -79,6 +79,7 @@ public class AAuto extends OpMode {
     private static ElapsedTime runtime = new ElapsedTime();
     private Util autoUility;
 
+    private final int EXIT_TIME_THRESHOLD = 20;
     private static DcMotor LeftForward = null;
     private static DcMotor LeftBack = null;
     private static DcMotor RightForward = null;
@@ -156,9 +157,9 @@ public class AAuto extends OpMode {
     int ALL_THRESH = 15;
     int TURNTHRESH = 30;
     double OPTIMUM_POWER = 0.4;
-    double STRAFE_POWER = 0.8;
+    double STRAFE_POWER = 0.5;
 
-    public static ElapsedTime timer = new ElapsedTime();
+    public static ElapsedTime stateTimer = new ElapsedTime();
 
     //All states will go in here
     public enum RobotState {
@@ -451,38 +452,38 @@ public class AAuto extends OpMode {
     {
         if (direction == RIGHT) {
             correction = pidDrive.performPID(getAngle());
-            LeftForward.setPower(-power+correction);
-            LeftBack.setPower(power-correction);
-            RightForward.setPower(-power+correction);
-            RightBack.setPower(power-correction);
+            LeftForward.setPower(-power - correction);
+            LeftBack.setPower(power + correction);
+            RightForward.setPower(-power + correction);
+            RightBack.setPower(power - correction);
+
         }
         else if (direction == LEFT) {
             correction = pidDrive.performPID(getAngle());
-            LeftForward.setPower(power-correction);
-            LeftBack.setPower(-power+correction);
-            RightForward.setPower(power-correction);
-            RightBack.setPower(-power+correction);
+            LeftForward.setPower(power + correction);
+            LeftBack.setPower(-power - correction);
+            RightForward.setPower(power - correction);
+            RightBack.setPower(-power + correction);
+
         }
         else if (direction == BACKWARD) {
             correction = pidDrive.performPID(getAngle());
-            RightForward.setPower(-power+correction);
-            LeftBack.setPower(power-correction);
-            LeftForward.setPower(power-correction);
-            RightBack.setPower(-power+correction);
+            RightForward.setPower(-power - correction);
+            LeftBack.setPower(power + correction);
+            LeftForward.setPower(power + correction);
+            RightBack.setPower(-power - correction);
+
         }
         else if (direction == FORWARD) {
             correction = pidDrive.performPID(getAngle());
-            RightForward.setPower(power-correction);
-            LeftBack.setPower(-power+correction);
-            LeftForward.setPower(-power+correction);
-            RightBack.setPower(power-correction);
+            RightForward.setPower(power + correction);
+            LeftBack.setPower(-power - correction);
+            LeftForward.setPower(-power - correction);
+            RightBack.setPower(power + correction);
+
         }
-        telemetry.addData("correction", correction);
-        telemetry.addData("LeftForward", LeftForward.getPower());
-        telemetry.addData("RightForward", RightForward.getPower());
-        telemetry.addData("LeftBack", LeftBack.getPower());
-        telemetry.addData("RightBack", RightBack.getPower());
-        telemetry.update();
+
+
     }
 
     /**
@@ -523,6 +524,7 @@ public class AAuto extends OpMode {
     public void start() {
 
         runtime.reset();
+
         pidDrive = new PIDController(0.04, 0, 0);
         pidDrive.setSetpoint(0);
         pidDrive.setInputRange(-90, 90);
@@ -539,7 +541,7 @@ public class AAuto extends OpMode {
         switch (CurrentState) {
 
             case INIT:
-                timer.reset();
+                stateTimer.reset();
                 pidDrive.reset();
                 if (SkyStonePos.equals("Left")) {
                     StartMotors(LEFT, STRAFE_POWER);
@@ -553,22 +555,23 @@ public class AAuto extends OpMode {
 
             case POSITION_TO_SKYSTONE:
                 pidDrive.reset();
-                ES = autoUility.CanIExitPositionToSkyStone();
-                if (ES == Util.Exit.ExitState && LeftDistance.getDistance(DistanceUnit.INCH) >= 50) {
+                ES = CanIExitPositionToSkyStone();
+                if (ES == Util.Exit.ExitState) {
                     StopDrive();
                     StartMotors(FORWARD, OPTIMUM_POWER);
                     CurrentState = RobotState.GO_TO_SKYSTONE;
                 } else if (ES == Util.Exit.NoTimeLeftExit) {
+                    telemetry.addData("Exiting Out with No Time", "");
                     CurrentState = RobotState.GO_TO_FOUNDATION;
                 } else if (ES == Util.Exit.DontExit) {
-                    if (SkyStonePos.equals("Left")) {
-                        DriveWithPID(LEFT, OPTIMUM_POWER);
-                        CurrentState = RobotState.GO_TO_SKYSTONE;
-                    } else if (SkyStonePos.equals("Right")) {
-                        DriveWithPID(RIGHT, OPTIMUM_POWER);
-                        CurrentState = RobotState.GO_TO_SKYSTONE;
-                    }
+
                 }
+                telemetry.addData("Time Left", 30 - runtime.seconds());
+                telemetry.addData("correction", correction);
+                telemetry.addData("LeftForward", LeftForward.getPower());
+                telemetry.addData("RightForward", RightForward.getPower());
+                telemetry.addData("LeftBack", LeftBack.getPower());
+                telemetry.addData("RightBack", RightBack.getPower());
                 telemetry.addData("CurrentState", "POSITION_TO_SKYSTONE");
                 telemetry.addData("LeftDistance", LeftDistance.getDistance(DistanceUnit.INCH));
                 telemetry.update();
@@ -580,45 +583,32 @@ public class AAuto extends OpMode {
                 ES = autoUility.CanIExitGoToSkyStone();
                 if (ES == Util.Exit.ExitState) {
                     StopDrive();
-                    StartMotors(FORWARD, OPTIMUM_POWER);
+                    stateTimer.reset();
                     CurrentState = RobotState.PICK_UP_STONE;
                 } else if (ES == Util.Exit.NoTimeLeftExit) {
+                    telemetry.addData("Exiting Out with No Time", "");
                     StartMotors(RIGHT, OPTIMUM_POWER);
                     CurrentState = RobotState.GO_TO_FOUNDATION;
                 } else if (ES == Util.Exit.DontExit) {
-                    DriveWithPID(FORWARD, OPTIMUM_POWER);
+
                 }
+                telemetry.addData("Time Left", 30 - runtime.seconds());
+                telemetry.addData("correction", correction);
+                telemetry.addData("LeftForward", LeftForward.getPower());
+                telemetry.addData("RightForward", RightForward.getPower());
+                telemetry.addData("LeftBack", LeftBack.getPower());
+                telemetry.addData("RightBack", RightBack.getPower());
                 telemetry.addData("CurrentState", "GO_TO_SKYSTONE");
                 telemetry.addData("LeftDistance", LeftDistance.getDistance(DistanceUnit.INCH));
                 telemetry.update();
 
                 break;
-            case WAIT:
-                pidDrive.reset();
-                ES = autoUility.CanIExitWait();
-                if (ES == Util.Exit.ExitState) {
-                    StopDrive();
-                    StartMotors(BACKWARD, OPTIMUM_POWER);
-                    timer.reset();
-                    CurrentState = RobotState.GO_TO_FOUNDATION;
-                } else if(ES == Util.Exit.NoTimeLeftExit) {
-                    StopDrive();
-                    CurrentState = RobotState.FOUNDATION_ARM_DOWN;
-                } else if(ES == Util.Exit.DontExit) {
-
-                }
-                telemetry.addData("CurrentState", "WAIT");
-                telemetry.update();
 
             case PICK_UP_STONE:
-                StopDrive();
                 pidDrive.reset();
                 ES = autoUility.CanIExitPickUpStone();
                 if (ES == Util.Exit.ExitState) {
-                    StopDrive();
                     StartMotors(RIGHT, OPTIMUM_POWER);
-                    timer.reset();
-                    LeftForward.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                     CurrentState = RobotState.GO_TO_FOUNDATION;
                 } else if(ES == Util.Exit.NoTimeLeftExit) {
                     StopDrive();
@@ -626,6 +616,7 @@ public class AAuto extends OpMode {
                 } else if(ES == Util.Exit.DontExit) {
 
                 }
+                telemetry.addData("Time Left", 30 - runtime.seconds());
                 telemetry.addData("CurrentState", "PICK_UP_STONE");
                 telemetry.addData("LeftDistance", LeftDistance.getDistance(DistanceUnit.INCH));
                 telemetry.update();
@@ -636,7 +627,7 @@ public class AAuto extends OpMode {
                 ES = autoUility.CanIExitGoToFoundation();
                 if (ES == Util.Exit.ExitState) {
                     StopDrive();
-                    timer.reset();
+                    stateTimer.reset();
                     CurrentState = RobotState.ARM_DOWN;
                 } else if(ES == Util.Exit.NoTimeLeftExit) {
                     StopDrive();
@@ -644,6 +635,7 @@ public class AAuto extends OpMode {
                 } else if(ES == Util.Exit.DontExit) {
                     DriveWithPID(RIGHT, OPTIMUM_POWER);
                 }
+                telemetry.addData("Time Left", 30 - runtime.seconds());
                 telemetry.addData("CurrentState", "GO_TO_FOUNDATION");
                 telemetry.addData("LeftDistance", LeftDistance.getDistance(DistanceUnit.INCH));
                 telemetry.update();
@@ -654,8 +646,7 @@ public class AAuto extends OpMode {
                 ES = autoUility.CanIExitArmDown();
                 if (ES == Util.Exit.ExitState) {
                     StopDrive();
-                    timer.reset();
-                    CurrentState = RobotState.RELEASE;
+                    CurrentState = RobotState.END;
                 } else if(ES == Util.Exit.NoTimeLeftExit) {
                     StopDrive();
                     CurrentState = RobotState.FOUNDATION_ARM_DOWN;
@@ -669,8 +660,9 @@ public class AAuto extends OpMode {
                 break;
 
             case END:
-            StopDrive();
-            break;
+                StopDrive();
+                break;
+
         }
         }
 
@@ -682,4 +674,29 @@ public class AAuto extends OpMode {
     public void stop () {
     }
 
+
+    public Util.Exit CanIExitPositionToSkyStone () {
+
+        if( runtime.seconds() > EXIT_TIME_THRESHOLD ) {
+            return Util.Exit.NoTimeLeftExit;
+        }
+        // center = 31 || left = 23 || right = 40
+        if (SkyStonePos == "Left") {
+            if (LeftDistance.getDistance(DistanceUnit.INCH) <= 23){
+                return Util.Exit.ExitState;
+            }
+
+        } else if (SkyStonePos == "Right") {
+            if (LeftDistance.getDistance(DistanceUnit.INCH) >= 40){
+                return Util.Exit.ExitState;
+            }
+
+        } else if (SkyStonePos == "Center") {
+            return Util.Exit.ExitState;
+        }
+
+
+        return Util.Exit.DontExit;
+
+    }
     }

@@ -87,6 +87,12 @@ public class Util {
         LeftCascade = inLeftCascade;
         RightCascade = inRightCascade;
 
+        LeftForward.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        LeftBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        RightForward.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        RightBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+
         //SENSORS
         LeftDistance = inLeftDistance;
         RightDistance = inRightDistance;
@@ -98,35 +104,13 @@ public class Util {
     }
 
 
-    public Exit CanIExitPositionToSkyStone () {
 
-        if( myRunTime.seconds() > EXIT_TIME_THRESHOLD ) {
-            return Exit.NoTimeLeftExit;
-        }
-        // center = 31 || left = 23 || right = 40
-        if (mySkyStonePos == "Left") {
-            if (LeftDistance.getDistance(DistanceUnit.INCH) <= 23){
-                return Exit.ExitState;
-            }
-
-        } else if (mySkyStonePos == "Right" && LeftDistance.getDistance(DistanceUnit.INCH) >= 50) {
-
-            return Exit.ExitState;
-
-
-        } else if (mySkyStonePos == "Center") {
-            return Exit.ExitState;
-        }
-
-        return Exit.DontExit;
-
-    }
     public Exit CanIExitGoToSkyStone () {
 
         if( myRunTime.seconds() > EXIT_TIME_THRESHOLD ) {
             return Exit.NoTimeLeftExit;
         }
-        if (BackDistance.getDistance(DistanceUnit.INCH) >= 15){
+        if (BackDistance.getDistance(DistanceUnit.INCH) >= 12){
             return Exit.ExitState;
         }
 
@@ -139,7 +123,7 @@ public class Util {
         if (myRunTime.seconds() > EXIT_TIME_THRESHOLD) {
             return Exit.NoTimeLeftExit;
         }
-        if (AAuto.timer.seconds() > 2) {
+        if (AAuto.stateTimer.seconds() > 2) {
             return Exit.ExitState;
         }
         return Exit.DontExit;
@@ -150,7 +134,7 @@ public class Util {
         if (myRunTime.seconds() > EXIT_TIME_THRESHOLD) {
             return Exit.NoTimeLeftExit;
         }
-        if (AAuto.timer.seconds() > 0.6) {
+        if (AAuto.stateTimer.seconds() > 0.6) {
             return Exit.ExitState;
         }
         return Exit.DontExit;
@@ -161,7 +145,7 @@ public class Util {
         if (myRunTime.seconds() > EXIT_TIME_THRESHOLD) {
             return Exit.NoTimeLeftExit;
         }
-        if (RightDistance.getDistance(DistanceUnit.INCH) <= 30 && LeftForward.getCurrentPosition() >= 1700) {
+        if (RightDistance.getDistance(DistanceUnit.INCH) <= 30) {
             return Exit.ExitState;
         }
 
@@ -173,7 +157,7 @@ public class Util {
         if (myRunTime.seconds() > EXIT_TIME_THRESHOLD) {
             return Exit.NoTimeLeftExit;
         }
-        if (AAuto.timer.seconds() > 2) {
+        if (AAuto.stateTimer.seconds() > 2) {
             return Exit.ExitState;
         }
         return Exit.DontExit;
@@ -184,7 +168,7 @@ public class Util {
         if (myRunTime.seconds() > EXIT_TIME_THRESHOLD) {
             return Exit.NoTimeLeftExit;
         }
-        if (AAuto.timer.seconds() > 2) {
+        if (AAuto.stateTimer.seconds() > 2) {
             return Exit.ExitState;
         }
         return Exit.DontExit;
