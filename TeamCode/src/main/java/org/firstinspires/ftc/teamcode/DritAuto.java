@@ -14,7 +14,6 @@ import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
-
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
@@ -82,7 +81,7 @@ public class DritAuto extends LinearOpMode {
     private BNO055IMU   imu_1;
     private BNO055IMU   imu;
 
-    PIDController pidDrive;
+    PIDController pidDrive = new PIDController(0.5, 0.05, 0.01);
     double        globalAngle, correction;
     Orientation   lastAngles = new Orientation();
 
@@ -180,6 +179,11 @@ public class DritAuto extends LinearOpMode {
         RightDistance = hardwareMap.get(DistanceSensor.class, "RightDistance");
         BackDistance = hardwareMap.get(DistanceSensor.class, "BackDistance");
 
+        LeftForward.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        RightForward.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        LeftBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        RightBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
         while (!(isStopRequested() || isStarted())) {
 
 
@@ -202,10 +206,17 @@ public class DritAuto extends LinearOpMode {
 
         runtime.reset();
         if(opModeIsActive()) {
+            if(SkyStonePos == "Left") {
 
+            }
+            if(SkyStonePos == "Center") {
 
+            }
+            if(SkyStonePos == "Right") {
 
+            }
         }
+
     }
 
     private void StartMotors(int Direction,  double Power)
@@ -261,42 +272,85 @@ public class DritAuto extends LinearOpMode {
         }
     }
 
-    private void DriveWithPID(int direction, double power)
+    private void DriveWithPID(int direction, double power, int TargetPosition)
     {
-        if (direction == RIGHT) {
-            correction = pidDrive.performPID(getAngle());
-            LeftForward.setPower(-power+correction);
-            LeftBack.setPower(power-correction);
-            RightForward.setPower(-power+correction);
-            RightBack.setPower(power-correction);
+        LeftForward.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        RightForward.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        LeftBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        RightBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        LeftForward.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        RightForward.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        LeftBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        RightBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        double LFpower, RFpower, LBpower, RBpower;
+
+        if (direction == FORWARD) {
+            LeftForward.setTargetPosition(-TargetPosition);
+            RightForward.setTargetPosition(TargetPosition);
+            LeftBack.setTargetPosition(-TargetPosition);
+            RightBack.setTargetPosition(TargetPosition);
+            LFpower = -power;
+            RFpower = power;
+            LBpower = -power;
+            RBpower = power;
+        } else if (direction == BACKWARD) {
+            LeftForward.setTargetPosition(TargetPosition);
+            RightForward.setTargetPosition(-TargetPosition);
+            LeftBack.setTargetPosition(TargetPosition);
+            RightBack.setTargetPosition(-TargetPosition);
+            LFpower = power;
+            RFpower = -power;
+            LBpower = power;
+            RBpower = -power;
+        } else if (direction == LEFT) {
+            LeftForward.setTargetPosition(TargetPosition);
+            RightForward.setTargetPosition(TargetPosition);
+            LeftBack.setTargetPosition(-TargetPosition);
+            RightBack.setTargetPosition(-TargetPosition);
+            LFpower = power;
+            RFpower = power;
+            LBpower = -power;
+            RBpower = -power;
+        } else if (direction == RIGHT) {
+            LeftForward.setTargetPosition(-TargetPosition);
+            RightForward.setTargetPosition(-TargetPosition);
+            LeftBack.setTargetPosition(TargetPosition);
+            RightBack.setTargetPosition(TargetPosition);
+            LFpower = -power;
+            RFpower = -power;
+            LBpower = power;
+            RBpower = power;
+        } else {
+            LFpower = 0;
+            RFpower = 0;
+            LBpower = 0;
+            RBpower = 0;
         }
-        else if (direction == LEFT) {
+
+        //Math.abs(LeftForward.getCurrentPosition()) < Math.abs(LeftForward.getTargetPosition())
+        while(opModeIsActive() && Math.abs(LeftForward.getCurrentPosition()) < Math.abs(LeftForward.getTargetPosition())) {
+
             correction = pidDrive.performPID(getAngle());
-            LeftForward.setPower(power-correction);
-            LeftBack.setPower(-power+correction);
-            RightForward.setPower(power-correction);
-            RightBack.setPower(-power+correction);
+            LeftForward.setPower(LFpower - correction);
+            LeftBack.setPower(LBpower - correction);
+            RightForward.setPower(RFpower - correction);
+            RightBack.setPower(RBpower - correction);
+
+            telemetry.addData("correction", correction);
+            telemetry.addData("LeftForward", LeftForward.getPower());
+            telemetry.addData("RightForward", RightForward.getPower());
+            telemetry.addData("LeftBack", LeftBack.getPower());
+            telemetry.addData("RightBack", RightBack.getPower());
+            telemetry.addData("CurrentPos", LeftForward.getCurrentPosition());
+            telemetry.addData("TargetPos", LeftForward.getTargetPosition());
+            telemetry.addData("reached TargetPos?", Math.abs(LeftForward.getCurrentPosition()) < Math.abs(LeftForward.getTargetPosition()));
+            telemetry.update();
+
+
         }
-        else if (direction == BACKWARD) {
-            correction = pidDrive.performPID(getAngle());
-            RightForward.setPower(-power+correction);
-            LeftBack.setPower(power-correction);
-            LeftForward.setPower(power-correction);
-            RightBack.setPower(-power+correction);
-        }
-        else if (direction == FORWARD) {
-            correction = pidDrive.performPID(getAngle());
-            RightForward.setPower(power-correction);
-            LeftBack.setPower(-power+correction);
-            LeftForward.setPower(-power+correction);
-            RightBack.setPower(power-correction);
-        }
-        telemetry.addData("correction", correction);
-        telemetry.addData("LeftForward", LeftForward.getPower());
-        telemetry.addData("RightForward", RightForward.getPower());
-        telemetry.addData("LeftBack", LeftBack.getPower());
-        telemetry.addData("RightBack", RightBack.getPower());
-        telemetry.update();
+        sleep(100);
     }
 
     /**

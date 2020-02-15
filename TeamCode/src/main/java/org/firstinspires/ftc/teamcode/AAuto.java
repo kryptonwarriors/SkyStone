@@ -38,6 +38,7 @@ import com.qualcomm.robotcore.hardware.Blinker;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -332,12 +333,7 @@ public class AAuto extends OpMode {
         RightDistance = hardwareMap.get(DistanceSensor.class, "RightDistance");
         BackDistance = hardwareMap.get(DistanceSensor.class, "BackDistance");
 
-        autoUility = new Util(LeftFoundation, RightFoundation,
-                LeftClamp, RightClamp,
-                LeftForward, LeftBack,
-                RightForward, RightBack,
-                LinearActuator, LeftCascade,
-                RightCascade, runtime, SkyStonePos, LeftDistance, RightDistance, BackDistance);
+        autoUility = new Util ( runtime, SkyStonePos, hardwareMap );
 
         //Reset Foundation Servo Positions
         LeftFoundation.setPosition(0.80);

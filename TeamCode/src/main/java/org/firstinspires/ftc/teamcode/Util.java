@@ -14,38 +14,37 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 // UTIL
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.hardware.HardwareMap; // DONT REMOVE THIS.
 
 // SENSORS
 import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.robotcore.util.Hardware;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.slf4j.IMarkerFactory;
 
 
 public class Util {
 
-    // SERVO
-    private static Servo LeftFoundation = null;
-    private static Servo RightFoundation = null;
-    private static Servo LeftClamp = null;
-    private static Servo RightClamp = null;
-
-    // DC MOTORS
-    private static DcMotor LeftForward = null;
-    private static DcMotor LeftBack = null;
-    private static DcMotor RightForward = null;
-    private static DcMotor RightBack = null;
-    private static DcMotor LinearActuator = null;
-    private static DcMotor LeftCascade = null;
-    private static DcMotor RightCascade = null;
-
-
-    // SENSORS
-    public static BNO055IMU IMU;
-    private static DistanceSensor LeftDistance,RightDistance,BackDistance;
-    private static TouchSensor RBBumper, RFBumper, LBBumper, LFBumper;
-
-    // MISC VARIABLES.
+    /* MISC VARIABLES */
     int FORWARD = 0;
+    // SERVO
+    private Servo LeftFoundation = null;
+    private Servo RightFoundation = null;
+    private Servo LeftClamp = null;
+    private Servo RightClamp = null;
+    // DC MOTORS
+    private DcMotor LeftForward = null;
+    private DcMotor LeftBack = null;
+    private DcMotor RightForward = null;
+    private DcMotor RightBack = null;
+    private DcMotor LinearActuator = null;
+    private DcMotor LeftCascade = null;
+    private DcMotor RightCascade = null;
+    // SENSORS
+    private BNO055IMU IMU;
+    private DistanceSensor LeftDistance, RightDistance, BackDistance;
+    private TouchSensor RBBumper, RFBumper, LBBumper, LFBumper;
     int BACKWARD = 1;
     int LEFT = 2;
     int RIGHT = 3;
@@ -65,42 +64,43 @@ public class Util {
     static private String mySkyStonePos;
     double Power;
     private ElapsedTime myRunTime;
-    public Util(Servo inLeftFoundation, Servo inRightFoundation,
-                Servo inLeftClamp, Servo inRightClamp,
-                DcMotor inLeftForward, DcMotor inLeftBack,
-                DcMotor inRightForward, DcMotor inRightBack,
-                DcMotor inLinearActuator, DcMotor inLeftCascade,
-                DcMotor inRightCascade, ElapsedTime runtime, String SkyStonePos,
-                DistanceSensor inLeftDistance, DistanceSensor inRightDistance, DistanceSensor inBackDistance) {
-        // SERVO
-        LeftFoundation = inLeftFoundation;
-        RightFoundation = inRightFoundation;
-        LeftClamp = inLeftClamp;
-        RightClamp = inRightClamp;
 
-        // DC MOTORS
-        LeftForward = inLeftForward;
-        LeftBack = inLeftBack;
-        RightForward = inRightForward;
-        RightBack = inRightBack;
-        LinearActuator = inLinearActuator;
-        LeftCascade = inLeftCascade;
-        RightCascade = inRightCascade;
+    Util(ElapsedTime runtime, String SkyStonePos, HardwareMap hardwareMap) {
+
+        /* SERVO */
+        RightClamp = hardwareMap.get ( Servo.class, "RightClamp" );
+        LeftClamp = hardwareMap.get ( Servo.class, "LeftClamp" );
+        LeftFoundation = hardwareMap.get ( Servo.class, "LeftFoundation" );
+        RightFoundation = hardwareMap.get ( Servo.class, "RightFoundation" );
+
+        /* DC MOTORS */
+        LeftForward = hardwareMap.get ( DcMotor.class, "LeftForward" );
+        RightForward = hardwareMap.get ( DcMotor.class, "RightForward" );
+        LeftBack = hardwareMap.get ( DcMotor.class, "LeftBack" );
+        RightBack = hardwareMap.get ( DcMotor.class, "RightBack" );
+        LinearActuator = hardwareMap.get ( DcMotor.class, "LinearActuator" );
+        LeftCascade = hardwareMap.get ( DcMotor.class, "LeftCascade" );
+        RightCascade = hardwareMap.get ( DcMotor.class, "RightCascade" );
+
+        /* SENSORS */
+        IMU = hardwareMap.get ( BNO055IMU.class, "IMU" );
+        LeftDistance = hardwareMap.get ( DistanceSensor.class, "LeftDistance" );
+        RightDistance = hardwareMap.get ( DistanceSensor.class, "RightDistance" );
+        BackDistance = hardwareMap.get ( DistanceSensor.class, "BackDistance" );
+        RBBumper = hardwareMap.get ( TouchSensor.class, "RBBumper" );
+        RFBumper = hardwareMap.get ( TouchSensor.class, "RFBumper" );
+        LBBumper = hardwareMap.get ( TouchSensor.class, "LBBumper" );
+        LFBumper = hardwareMap.get ( TouchSensor.class, "LFBumper" );
+
 
         LeftForward.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         LeftBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         RightForward.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         RightBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-
-        //SENSORS
-        LeftDistance = inLeftDistance;
-        RightDistance = inRightDistance;
-        BackDistance = inBackDistance;
-
+        /* VARIABLES */
         myRunTime = runtime;
         mySkyStonePos = SkyStonePos;
-
     }
 
 

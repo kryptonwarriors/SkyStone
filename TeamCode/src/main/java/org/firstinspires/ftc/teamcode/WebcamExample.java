@@ -34,6 +34,8 @@ import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvPipeline;
 
+import java.util.Locale;
+
 @TeleOp
 public class WebcamExample extends LinearOpMode
 {
@@ -99,7 +101,7 @@ public class WebcamExample extends LinearOpMode
              * Send some stats to the telemetry
              */
             telemetry.addData("Frame Count", webcam.getFrameCount());
-            telemetry.addData("FPS", String.format("%.2f", webcam.getFps()));
+            telemetry.addData ( "FPS", String.format ( Locale.ENGLISH, "%.2f", webcam.getFps () ) );
             telemetry.addData("Total frame time ms", webcam.getTotalFrameTimeMs());
             telemetry.addData("Pipeline time ms", webcam.getPipelineTimeMs());
             telemetry.addData("Overhead time ms", webcam.getOverheadTimeMs());
