@@ -97,12 +97,12 @@ public class AAuto extends OpMode {
     private static DistanceSensor RightDistance = null;
     private static DistanceSensor BackDistance = null;
 
-    private BNO055IMU   imu_1;
-    private BNO055IMU   imu;
+    private BNO055IMU imu_1;
+    private BNO055IMU imu;
 
     PIDController pidDrive;
-    double        globalAngle, correction;
-    Orientation   lastAngles = new Orientation();
+    double globalAngle, correction;
+    Orientation lastAngles = new Orientation();
 
     private static int valMid = -1;
     private static int valLeft = -1;
@@ -110,15 +110,15 @@ public class AAuto extends OpMode {
 
     private static String SkyStonePos;
 
-    private static float rectHeight = .6f/8f;
-    private static float rectWidth = 1.5f/8f;
+    private static float rectHeight = .6f / 8f;
+    private static float rectWidth = 1.5f / 8f;
 
-    private static float offsetX = 0f/8f;//changing this moves the three rects and the three circles left or right, range : (-2, 2) not inclusive
-    private static float offsetY = 0f/8f;//changing this moves the three rects and circles up or down, range: (-4, 4) not inclusive
+    private static float offsetX = 0f / 8f;//changing this moves the three rects and the three circles left or right, range : (-2, 2) not inclusive
+    private static float offsetY = 0f / 8f;//changing this moves the three rects and circles up or down, range: (-4, 4) not inclusive
 
-    private static float[] midPos = {4f/8f+offsetX, 4f/9f+offsetY};//0 = col, 1 = row
-    private static float[] leftPos = {2f/11.4f+offsetX, 4f/9f+offsetY};
-    private static float[] rightPos = {5f/6f+offsetX, 4f/9f+offsetY};
+    private static float[] midPos = {4f / 8f + offsetX, 4f / 9f + offsetY};//0 = col, 1 = row
+    private static float[] leftPos = {2f / 11.4f + offsetX, 4f / 9f + offsetY};
+    private static float[] rightPos = {5f / 6f + offsetX, 4f / 9f + offsetY};
     //moves all rectangles right or left by amount. units are in ratio to monitor
 
     private final int rows = 640;
@@ -163,7 +163,8 @@ public class AAuto extends OpMode {
 
     //All states will go in here
     public enum RobotState {
-        INIT, POSITION_TO_SKYSTONE, GO_TO_SKYSTONE, WAIT, PICK_UP_STONE, GO_TO_FOUNDATION, GO_to_SKYSTONE2,ARM_DOWN, RELEASE, ARM_UP, FOUNDATION_ARM_DOWN, END
+        INIT, POSITION_TO_SKYSTONE, GO_TO_SKYSTONE, WAIT, PICK_UP_STONE, GO_TO_FOUNDATION, GO_to_SKYSTONE2, ARM_DOWN, RELEASE, ARM_UP, FOUNDATION_ARM_DOWN,
+        GO_BACK_FOR_STONE, END
     }
 
     RobotState CurrentState = RobotState.INIT;
@@ -171,15 +172,13 @@ public class AAuto extends OpMode {
      * Code to run ONCE when the driver hits INIT
      */
 
-    static class StageSwitchingPipeline extends OpenCvPipeline
-    {
+    static class StageSwitchingPipeline extends OpenCvPipeline {
         Mat yCbCrChan2Mat = new Mat();
         Mat thresholdMat = new Mat();
         Mat all = new Mat();
         List<MatOfPoint> contoursList = new ArrayList<>();
 
-        enum Stage
-        {//color difference. greyscale
+        enum Stage {//color difference. greyscale
             detection,//includes outlines
             THRESHOLD,//b&w
             RAW_IMAGE,//displays raw view
@@ -189,8 +188,7 @@ public class AAuto extends OpMode {
         private opencvSkystoneDetector.StageSwitchingPipeline.Stage[] stages = opencvSkystoneDetector.StageSwitchingPipeline.Stage.values();
 
         @Override
-        public void onViewportTapped()
-        {
+        public void onViewportTapped() {
             /*
              * Note that this method is invoked from the UI thread
              * so whatever we do here, we must do quickly.
@@ -200,8 +198,7 @@ public class AAuto extends OpMode {
 
             int nextStageNum = currentStageNum + 1;
 
-            if(nextStageNum >= stages.length)
-            {
+            if (nextStageNum >= stages.length) {
                 nextStageNum = 0;
             }
 
@@ -209,8 +206,7 @@ public class AAuto extends OpMode {
         }
 
         @Override
-        public Mat processFrame(Mat input)
-        {
+        public Mat processFrame(Mat input) {
             contoursList.clear();
             /*
              * This pipeline finds the contours of yellow blobs such as the Gold Mineral
@@ -233,73 +229,68 @@ public class AAuto extends OpMode {
 
 
             //get values from frame
-            double[] pixMid = thresholdMat.get((int)(input.rows()* midPos[1]), (int)(input.cols()* midPos[0]));//gets value at circle
-            valMid = (int)pixMid[0];
+            double[] pixMid = thresholdMat.get((int) (input.rows() * midPos[1]), (int) (input.cols() * midPos[0]));//gets value at circle
+            valMid = (int) pixMid[0];
 
-            double[] pixLeft = thresholdMat.get((int)(input.rows()* leftPos[1]), (int)(input.cols()* leftPos[0]));//gets value at circle
-            valLeft = (int)pixLeft[0];
+            double[] pixLeft = thresholdMat.get((int) (input.rows() * leftPos[1]), (int) (input.cols() * leftPos[0]));//gets value at circle
+            valLeft = (int) pixLeft[0];
 
-            double[] pixRight = thresholdMat.get((int)(input.rows()* rightPos[1]), (int)(input.cols()* rightPos[0]));//gets value at circle
-            valRight = (int)pixRight[0];
+            double[] pixRight = thresholdMat.get((int) (input.rows() * rightPos[1]), (int) (input.cols() * rightPos[0]));//gets value at circle
+            valRight = (int) pixRight[0];
 
             //create three points
-            Point pointMid = new Point((int)(input.cols()* midPos[0]), (int)(input.rows()* midPos[1]));
-            Point pointLeft = new Point((int)(input.cols()* leftPos[0]), (int)(input.rows()* leftPos[1]));
-            Point pointRight = new Point((int)(input.cols()* rightPos[0]), (int)(input.rows()* rightPos[1]));
+            Point pointMid = new Point((int) (input.cols() * midPos[0]), (int) (input.rows() * midPos[1]));
+            Point pointLeft = new Point((int) (input.cols() * leftPos[0]), (int) (input.rows() * leftPos[1]));
+            Point pointRight = new Point((int) (input.cols() * rightPos[0]), (int) (input.rows() * rightPos[1]));
 
             //draw circles on those points
-            Imgproc.circle(all, pointMid,5, new Scalar( 255, 0, 0 ),1 );//draws circle
-            Imgproc.circle(all, pointLeft,5, new Scalar( 255, 0, 0 ),1 );//draws circle
-            Imgproc.circle(all, pointRight,5, new Scalar( 255, 0, 0 ),1 );//draws circle
+            Imgproc.circle(all, pointMid, 5, new Scalar(255, 0, 0), 1);//draws circle
+            Imgproc.circle(all, pointLeft, 5, new Scalar(255, 0, 0), 1);//draws circle
+            Imgproc.circle(all, pointRight, 5, new Scalar(255, 0, 0), 1);//draws circle
 
             //draw 3 rectangles
             Imgproc.rectangle(//1-3
                     all,
                     new Point(
-                            input.cols()*(leftPos[0]-rectWidth/1.5),
-                            input.rows()*(leftPos[1]-rectHeight/.7)),
+                            input.cols() * (leftPos[0] - rectWidth / 1.5),
+                            input.rows() * (leftPos[1] - rectHeight / .7)),
                     new Point(
-                            input.cols()*(leftPos[0]+rectWidth/1.5),
-                            input.rows()*(leftPos[1]+rectHeight/.7)),
+                            input.cols() * (leftPos[0] + rectWidth / 1.5),
+                            input.rows() * (leftPos[1] + rectHeight / .7)),
                     new Scalar(0, 255, 0), 3);
             Imgproc.rectangle(//3-5
                     all,
                     new Point(
-                            input.cols()*(midPos[0]-rectWidth/1.5),
-                            input.rows()*(midPos[1]-rectHeight/.7)),
+                            input.cols() * (midPos[0] - rectWidth / 1.5),
+                            input.rows() * (midPos[1] - rectHeight / .7)),
                     new Point(
-                            input.cols()*(midPos[0]+rectWidth/1.5),
-                            input.rows()*(midPos[1]+rectHeight/.7)),
+                            input.cols() * (midPos[0] + rectWidth / 1.5),
+                            input.rows() * (midPos[1] + rectHeight / .7)),
                     new Scalar(0, 255, 0), 3);
             Imgproc.rectangle(//5-7
                     all,
                     new Point(
-                            input.cols()*(rightPos[0]-rectWidth/1.5),
-                            input.rows()*(rightPos[1]-rectHeight/.7)),
+                            input.cols() * (rightPos[0] - rectWidth / 1.5),
+                            input.rows() * (rightPos[1] - rectHeight / .7)),
                     new Point(
-                            input.cols()*(rightPos[0]+rectWidth/1.5),
-                            input.rows()*(rightPos[1]+rectHeight/.7)),
+                            input.cols() * (rightPos[0] + rectWidth / 1.5),
+                            input.rows() * (rightPos[1] + rectHeight / .7)),
                     new Scalar(0, 255, 0), 3);
 
-            switch (stageToRenderToViewport)
-            {
-                case THRESHOLD:
-                {
+            switch (stageToRenderToViewport) {
+                case THRESHOLD: {
                     return thresholdMat;
                 }
 
-                case detection:
-                {
+                case detection: {
                     return all;
                 }
 
-                case RAW_IMAGE:
-                {
+                case RAW_IMAGE: {
                     return input;
                 }
 
-                default:
-                {
+                default: {
                     return input;
                 }
             }
@@ -311,9 +302,9 @@ public class AAuto extends OpMode {
     public void init() {
 
         BNO055IMU.Parameters imuParameters = new BNO055IMU.Parameters();
-        imuParameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
-        imuParameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-        imuParameters.loggingEnabled      = false;
+        imuParameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
+        imuParameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+        imuParameters.loggingEnabled = false;
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         imu.initialize(imuParameters);
 
@@ -341,12 +332,12 @@ public class AAuto extends OpMode {
         RightDistance = hardwareMap.get(DistanceSensor.class, "RightDistance");
         BackDistance = hardwareMap.get(DistanceSensor.class, "BackDistance");
 
-        autoUility = new Util( LeftFoundation, RightFoundation,
+        autoUility = new Util(LeftFoundation, RightFoundation,
                 LeftClamp, RightClamp,
                 LeftForward, LeftBack,
-                RightForward,  RightBack,
-                LinearActuator,  LeftCascade,
-                RightCascade,  runtime, SkyStonePos, LeftDistance, RightDistance, BackDistance);
+                RightForward, RightBack,
+                LinearActuator, LeftCascade,
+                RightCascade, runtime, SkyStonePos, LeftDistance, RightDistance, BackDistance);
 
         //Reset Foundation Servo Positions
         LeftFoundation.setPosition(0.80);
@@ -375,20 +366,19 @@ public class AAuto extends OpMode {
                 SkyStonePos = "Left";
             } else if (valMid == 0) {
                 SkyStonePos = "Center";
-            } else if (valRight == 0){
+            } else if (valRight == 0) {
                 SkyStonePos = "Right";
 
             }
         }
 
-        if  ( !imu.isGyroCalibrated() ) {
+        if (!imu.isGyroCalibrated()) {
             telemetry.addData(">", "calibrating");
-        }
-        else {
+        } else {
             telemetry.addData(">", "calibration done");
         }
-        telemetry.addData("Values", valLeft+"   "+valMid+"   "+valRight);
-        telemetry.addData("SkyStonePos",SkyStonePos);
+        telemetry.addData("Values", valLeft + "   " + valMid + "   " + valRight);
+        telemetry.addData("SkyStonePos", SkyStonePos);
         telemetry.addData("LeftDistance", LeftDistance.getDistance(DistanceUnit.INCH));
         telemetry.addData("RightDistance", RightDistance.getDistance(DistanceUnit.INCH));
         telemetry.addData("BackDistance", BackDistance.getDistance(DistanceUnit.INCH));
@@ -396,8 +386,7 @@ public class AAuto extends OpMode {
     }
 
 
-    private void StartMotors(int Direction,  double Power)
-    {
+    private void StartMotors(int Direction, double Power) {
         LeftForward.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         RightForward.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         LeftBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -414,33 +403,28 @@ public class AAuto extends OpMode {
             LeftBack.setPower(-Power);
             LeftForward.setPower(-Power);
             RightBack.setPower(Power);
-        }
-        else if (Direction == BACKWARD) {
+        } else if (Direction == BACKWARD) {
             RightForward.setPower(-Power);
             LeftBack.setPower(Power);
             LeftForward.setPower(Power);
             RightBack.setPower(-Power);
-        }
-        else if (Direction == LEFT) {
+        } else if (Direction == LEFT) {
             LeftForward.setPower(Power);
             LeftBack.setPower(-Power);
             RightForward.setPower(Power);
             RightBack.setPower(-Power);
-        }
-        else if (Direction == RIGHT) {
+        } else if (Direction == RIGHT) {
             LeftForward.setPower(-Power);
             LeftBack.setPower(Power);
             RightForward.setPower(-Power);
             RightBack.setPower(Power);
-        }
-        else if (Direction == RTurn) {
+        } else if (Direction == RTurn) {
             THRESH = TURNTHRESH;
             LeftForward.setPower(-Power);
             LeftBack.setPower(-Power);
             RightForward.setPower(-Power);
             RightBack.setPower(-Power);
-        }
-        else if (Direction == LTurn) {
+        } else if (Direction == LTurn) {
             THRESH = TURNTHRESH;
             LeftForward.setPower(Power);
             LeftBack.setPower(Power);
@@ -449,33 +433,29 @@ public class AAuto extends OpMode {
         }
     }
 
-    private void DriveWithPID(int direction, double power)
-    {
+    private void DriveWithPID(int direction, double power) {
         if (direction == RIGHT) {
             correction = pidDrive.performPID(getAngle());
-            LeftForward.setPower(-power - correction);
-            LeftBack.setPower(power - correction);
-            RightForward.setPower(-power - correction);
-            RightBack.setPower(power - correction);
+            LeftForward.setPower(-power);
+            LeftBack.setPower(power);
+            RightForward.setPower(-power);
+            RightBack.setPower(power);
 
-        }
-        else if (direction == LEFT) {
+        } else if (direction == LEFT) {
             correction = pidDrive.performPID(getAngle());
             LeftForward.setPower(power - correction);
             LeftBack.setPower(-power - correction);
             RightForward.setPower(power - correction);
             RightBack.setPower(-power - correction);
 
-        }
-        else if (direction == BACKWARD) {
+        } else if (direction == BACKWARD) {
             correction = pidDrive.performPID(getAngle());
             RightForward.setPower(-power - correction);
             LeftBack.setPower(power - correction);
             LeftForward.setPower(power - correction);
             RightBack.setPower(-power - correction);
 
-        }
-        else if (direction == FORWARD) {
+        } else if (direction == FORWARD) {
             correction = pidDrive.performPID(getAngle());
             RightForward.setPower(power - correction);
             LeftBack.setPower(-power - correction);
@@ -489,10 +469,10 @@ public class AAuto extends OpMode {
 
     /**
      * Get current cumulative angle rotation from last reset.
+     *
      * @return Angle in degrees. + = left, - = right from zero point.
      */
-    private double getAngle()
-    {
+    private double getAngle() {
 
         Orientation angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
 
@@ -510,15 +490,14 @@ public class AAuto extends OpMode {
         return globalAngle;
     }
 
-    private void StopDrive()
-    {
+    private void StopDrive() {
         LeftBack.setPower(0.0);
         LeftForward.setPower(0.0);
         RightForward.setPower(0.0);
         RightBack.setPower(0.0);
     }
 
-        /*
+    /*
      * Code to run ONCE when the driver hits PLAY
      */
     @Override
@@ -526,7 +505,7 @@ public class AAuto extends OpMode {
 
         runtime.reset();
 
-        pidDrive = new PIDController(0.04, 0, 0);
+        pidDrive = new PIDController(-0.8, 0, 0);
         pidDrive.setSetpoint(0);
         pidDrive.setInputRange(-90, 90);
         pidDrive.enable();
@@ -611,10 +590,10 @@ public class AAuto extends OpMode {
                 if (ES == Util.Exit.ExitState) {
                     DriveWithPID(RIGHT, OPTIMUM_POWER);
                     CurrentState = RobotState.GO_TO_FOUNDATION;
-                } else if(ES == Util.Exit.NoTimeLeftExit) {
+                } else if (ES == Util.Exit.NoTimeLeftExit) {
                     StopDrive();
                     CurrentState = RobotState.FOUNDATION_ARM_DOWN;
-                } else if(ES == Util.Exit.DontExit) {
+                } else if (ES == Util.Exit.DontExit) {
 
                 }
                 telemetry.addData("Time Left", 30 - runtime.seconds());
@@ -630,10 +609,10 @@ public class AAuto extends OpMode {
                     StopDrive();
                     stateTimer.reset();
                     CurrentState = RobotState.ARM_DOWN;
-                } else if(ES == Util.Exit.NoTimeLeftExit) {
+                } else if (ES == Util.Exit.NoTimeLeftExit) {
                     StopDrive();
                     CurrentState = RobotState.FOUNDATION_ARM_DOWN;
-                } else if(ES == Util.Exit.DontExit) {
+                } else if (ES == Util.Exit.DontExit) {
                     DriveWithPID(RIGHT, OPTIMUM_POWER);
                 }
                 telemetry.addData("Time Left", 30 - runtime.seconds());
@@ -647,12 +626,30 @@ public class AAuto extends OpMode {
                 ES = autoUility.CanIExitArmDown();
                 if (ES == Util.Exit.ExitState) {
                     StopDrive();
-                    CurrentState = RobotState.END;
-                } else if(ES == Util.Exit.NoTimeLeftExit) {
+                    DriveWithPID(LEFT, STRAFE_POWER);
+                    CurrentState = RobotState.GO_BACK_FOR_STONE;
+                } else if (ES == Util.Exit.NoTimeLeftExit) {
                     StopDrive();
-                    CurrentState = RobotState.FOUNDATION_ARM_DOWN;
+                    DriveWithPID(LEFT, STRAFE_POWER);
+                    CurrentState = RobotState.GO_TO_FOUNDATION;
                 } else if (ES == Util.Exit.DontExit) {
                     telemetry.addData("CurrentState", "ARM_DOWN");
+                    telemetry.addData("LeftDistance", LeftDistance.getDistance(DistanceUnit.INCH));
+                    telemetry.addData("RightDistance", RightDistance.getDistance(DistanceUnit.INCH));
+                    telemetry.update();
+                }
+
+                break;
+            case GO_BACK_FOR_STONE:
+               ES = CanIExitGoBackToStone();
+                if (ES == Util.Exit.ExitState) {
+                    StopDrive();
+                    CurrentState = RobotState.GO_TO_FOUNDATION;
+                } else if (ES == Util.Exit.NoTimeLeftExit) {
+                    StopDrive();
+                    CurrentState = RobotState.PICK_UP_STONE;
+                } else if (ES == Util.Exit.DontExit) {
+                    telemetry.addData("CurrentState", "GO_BACK");
                     telemetry.addData("LeftDistance", LeftDistance.getDistance(DistanceUnit.INCH));
                     telemetry.addData("RightDistance", RightDistance.getDistance(DistanceUnit.INCH));
                     telemetry.update();
@@ -662,33 +659,35 @@ public class AAuto extends OpMode {
 
             case END:
                 StopDrive();
+                telemetry.addData("State", "END");
+                telemetry.update();
                 break;
 
         }
-        }
+    }
 
 
     /*
      * Code to run ONCE after the driver hits STOP
      */
     @Override
-    public void stop () {
+    public void stop() {
     }
 
 
-    public Util.Exit CanIExitPositionToSkyStone () {
+    public Util.Exit CanIExitPositionToSkyStone() {
 
-        if( runtime.seconds() > EXIT_TIME_THRESHOLD ) {
+        if (runtime.seconds() > EXIT_TIME_THRESHOLD) {
             return Util.Exit.NoTimeLeftExit;
         }
         // center = 31 || left = 23 || right = 40
         if (SkyStonePos == "Left") {
-            if (LeftDistance.getDistance(DistanceUnit.INCH) <= 23){
+            if (LeftDistance.getDistance(DistanceUnit.INCH) <= 23) {
                 return Util.Exit.ExitState;
             }
 
         } else if (SkyStonePos == "Right") {
-            if (LeftDistance.getDistance(DistanceUnit.INCH) >= 40){
+            if (LeftDistance.getDistance(DistanceUnit.INCH) >= 40) {
                 return Util.Exit.ExitState;
             }
 
@@ -700,4 +699,30 @@ public class AAuto extends OpMode {
         return Util.Exit.DontExit;
 
     }
+
+    public Util.Exit CanIExitGoBackToStone() {
+
+        if (runtime.seconds() > EXIT_TIME_THRESHOLD) {
+            return Util.Exit.NoTimeLeftExit;
+        }
+        // center = 5 || left = 1 || right = 14
+        if (SkyStonePos == "Left") {
+            if (LeftDistance.getDistance(DistanceUnit.INCH) <= 1) {
+                return Util.Exit.ExitState;
+            }
+
+        } else if (SkyStonePos == "Right") {
+            if (LeftDistance.getDistance(DistanceUnit.INCH) >= 14) {
+                return Util.Exit.ExitState;
+            }
+
+        } else if (SkyStonePos == "Center") {
+            if (LeftDistance.getDistance(DistanceUnit.INCH) <= 5) {
+                return Util.Exit.ExitState;
+            }
+
+        }
+
+        return Util.Exit.DontExit;
     }
+}
