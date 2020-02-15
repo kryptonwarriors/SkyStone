@@ -37,13 +37,11 @@ import org.openftc.easyopencv.OpenCvPipeline;
 import java.util.Locale;
 
 @TeleOp
-public class WebcamExample extends LinearOpMode
-{
+public class WebcamExample extends LinearOpMode {
     OpenCvCamera webcam;
 
     @Override
-    public void runOpMode()
-    {
+    public void runOpMode() {
         /*
          * Instantiate an OpenCvCamera object for the camera we'll be using.
          * In this sample, we're using a webcam. Note that you will need to
@@ -54,8 +52,11 @@ public class WebcamExample extends LinearOpMode
          * the RC phone). If no camera monitor is desired, use the alternate
          * single-parameter constructor instead (commented out below)
          */
-        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
+        int cameraMonitorViewId =
+                hardwareMap.appContext.getResources ().getIdentifier ( "cameraMonitorViewId", "id",
+                                                                       hardwareMap.appContext.getPackageName () );
+        webcam = OpenCvCameraFactory.getInstance ().createWebcam (
+                hardwareMap.get ( WebcamName.class, "Webcam 1" ), cameraMonitorViewId );
 
         // OR...  Do Not Activate the Camera Monitor View
         //webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"));
@@ -63,14 +64,14 @@ public class WebcamExample extends LinearOpMode
         /*
          * Open the connection to the camera device
          */
-        webcam.openCameraDevice();
+        webcam.openCameraDevice ();
 
         /*
          * Specify the image processing pipeline we wish to invoke upon receipt
          * of a frame from the camera. Note that switching pipelines on-the-fly
          * (while a streaming session is in flight) *IS* supported.
          */
-        webcam.setPipeline(new SamplePipeline());
+        webcam.setPipeline ( new SamplePipeline () );
 
         /*
          * Tell the webcam to start streaming images to us! Note that you must make sure
@@ -88,25 +89,24 @@ public class WebcamExample extends LinearOpMode
          * For a rear facing camera or a webcam, rotation is defined assuming the camera is facing
          * away from the user.
          */
-        webcam.startStreaming(720, 1280, OpenCvCameraRotation.UPRIGHT);
+        webcam.startStreaming ( 720, 1280, OpenCvCameraRotation.UPRIGHT );
 
         /*
          * Wait for the user to press start on the Driver Station
          */
-        waitForStart();
+        waitForStart ();
 
-        while (opModeIsActive())
-        {
+        while (opModeIsActive ()) {
             /*
              * Send some stats to the telemetry
              */
-            telemetry.addData("Frame Count", webcam.getFrameCount());
+            telemetry.addData ( "Frame Count", webcam.getFrameCount () );
             telemetry.addData ( "FPS", String.format ( Locale.ENGLISH, "%.2f", webcam.getFps () ) );
-            telemetry.addData("Total frame time ms", webcam.getTotalFrameTimeMs());
-            telemetry.addData("Pipeline time ms", webcam.getPipelineTimeMs());
-            telemetry.addData("Overhead time ms", webcam.getOverheadTimeMs());
-            telemetry.addData("Theoretical max FPS", webcam.getCurrentPipelineMaxFps());
-            telemetry.update();
+            telemetry.addData ( "Total frame time ms", webcam.getTotalFrameTimeMs () );
+            telemetry.addData ( "Pipeline time ms", webcam.getPipelineTimeMs () );
+            telemetry.addData ( "Overhead time ms", webcam.getOverheadTimeMs () );
+            telemetry.addData ( "Theoretical max FPS", webcam.getCurrentPipelineMaxFps () );
+            telemetry.update ();
 
             /*
              * NOTE: stopping the stream from the camera early (before the end of the OpMode
@@ -132,8 +132,7 @@ public class WebcamExample extends LinearOpMode
      * if you're doing something weird where you do need it synchronized with your OpMode thread,
      * then you will need to account for that accordingly.
      */
-    class SamplePipeline extends OpenCvPipeline
-    {
+    class SamplePipeline extends OpenCvPipeline {
         /*
          * NOTE: if you wish to use additional Mat objects in your processing pipeline, it is
          * highly recommended to declare them here as instance variables and re-use them for
@@ -144,8 +143,7 @@ public class WebcamExample extends LinearOpMode
          */
 
         @Override
-        public Mat processFrame(Mat input)
-        {
+        public Mat processFrame(Mat input) {
             /*
              * IMPORTANT NOTE: the input Mat that is passed in as a parameter to this method
              * will only dereference to the same image for the duration of this particular
@@ -157,20 +155,20 @@ public class WebcamExample extends LinearOpMode
             /*
              * Draw a simple box around the middle 1/2 of the entire frame
              */
-            Imgproc.rectangle(
+            Imgproc.rectangle (
                     input,
-                    new Point(
-                            input.cols()/4,
-                            input.rows()/4),
-                    new Point(
-                            input.cols()*(3f/4f),
-                            input.rows()*(3f/4f)),
-                    new Scalar(0, 255, 0), 4);
+                    new Point (
+                            input.cols () / 4,
+                            input.rows () / 4 ),
+                    new Point (
+                            input.cols () * (3f / 4f),
+                            input.rows () * (3f / 4f) ),
+                    new Scalar ( 0, 255, 0 ), 4 );
 
-            /**
-             * NOTE: to see how to get data from your pipeline to your OpMode as well as how
-             * to change which stage of the pipeline is rendered to the viewport when it is
-             * tapped, please see {@link PipelineStageSwitchingExample}
+            /*
+              NOTE: to see how to get data from your pipeline to your OpMode as well as how
+              to change which stage of the pipeline is rendered to the viewport when it is
+              tapped, please see {@link PipelineStageSwitchingExample}
              */
 
             return input;
