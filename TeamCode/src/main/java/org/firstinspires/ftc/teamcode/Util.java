@@ -83,7 +83,7 @@ public class Util {
         RightCascade = hardwareMap.get ( DcMotor.class, "RightCascade" );
 
         /* SENSORS */
-        IMU = hardwareMap.get ( BNO055IMU.class, "IMU" );
+        IMU = hardwareMap.get ( BNO055IMU.class, "imu" );
         LeftDistance = hardwareMap.get ( DistanceSensor.class, "LeftDistance" );
         RightDistance = hardwareMap.get ( DistanceSensor.class, "RightDistance" );
         BackDistance = hardwareMap.get ( DistanceSensor.class, "BackDistance" );
@@ -110,7 +110,7 @@ public class Util {
         if( myRunTime.seconds() > EXIT_TIME_THRESHOLD ) {
             return Exit.NoTimeLeftExit;
         }
-        if (BackDistance.getDistance(DistanceUnit.INCH) >= 12){
+        if (BackDistance.getDistance(DistanceUnit.INCH) >= 14){
             return Exit.ExitState;
         }
 

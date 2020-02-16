@@ -406,14 +406,14 @@ public class AAuto extends OpMode {
             RightBack.setPower(-Power);
         } else if (Direction == LEFT) {
             LeftForward.setPower(Power);
-            LeftBack.setPower(-Power);
+            LeftBack.setPower(-0.85*Power);
             RightForward.setPower(Power);
-            RightBack.setPower(-Power);
+            RightBack.setPower(-0.85*Power);
         } else if (Direction == RIGHT) {
             LeftForward.setPower(-Power);
-            LeftBack.setPower(Power);
+            LeftBack.setPower(0.85*Power);
             RightForward.setPower(-Power);
-            RightBack.setPower(Power);
+            RightBack.setPower(0.85*Power);
         } else if (Direction == RTurn) {
             THRESH = TURNTHRESH;
             LeftForward.setPower(-Power);
@@ -501,7 +501,7 @@ public class AAuto extends OpMode {
 
         runtime.reset();
 
-        pidDrive = new PIDController(-0.8, 0, 0);
+        pidDrive = new PIDController(0.19, 0.165, 0);
         pidDrive.setSetpoint(0);
         pidDrive.setInputRange(-90, 90);
         pidDrive.enable();
@@ -513,12 +513,12 @@ public class AAuto extends OpMode {
      */
     @Override
     public void loop() {
+        pidDrive.reset();
         Util.Exit ES;
         switch (CurrentState) {
 
             case INIT:
                 stateTimer.reset();
-                pidDrive.reset();
                 if (SkyStonePos.equals("Left")) {
                     DriveWithPID(LEFT, STRAFE_POWER);
                 } else if (SkyStonePos.equals("Right")) {
@@ -530,7 +530,6 @@ public class AAuto extends OpMode {
                 break;
 
             case POSITION_TO_SKYSTONE:
-                pidDrive.reset();
                 ES = CanIExitPositionToSkyStone();
                 if (ES == Util.Exit.ExitState) {
                     StopDrive();
@@ -555,7 +554,6 @@ public class AAuto extends OpMode {
                 break;
 
             case GO_TO_SKYSTONE:
-                pidDrive.reset();
                 ES = autoUility.CanIExitGoToSkyStone();
                 if (ES == Util.Exit.ExitState) {
                     StopDrive();
@@ -581,7 +579,6 @@ public class AAuto extends OpMode {
                 break;
 
             case PICK_UP_STONE:
-                pidDrive.reset();
                 ES = autoUility.CanIExitPickUpStone();
                 if (ES == Util.Exit.ExitState) {
                     DriveWithPID(RIGHT, OPTIMUM_POWER);
@@ -599,7 +596,6 @@ public class AAuto extends OpMode {
                 break;
 
             case GO_TO_FOUNDATION:
-                pidDrive.reset();
                 ES = autoUility.CanIExitGoToFoundation();
                 if (ES == Util.Exit.ExitState) {
                     StopDrive();
@@ -618,7 +614,6 @@ public class AAuto extends OpMode {
                 break;
 
             case ARM_DOWN:
-                pidDrive.reset();
                 ES = autoUility.CanIExitArmDown();
                 if (ES == Util.Exit.ExitState) {
                     StopDrive();
@@ -708,7 +703,7 @@ public class AAuto extends OpMode {
             }
 
         } else if (SkyStonePos == "Right") {
-            if (LeftDistance.getDistance(DistanceUnit.INCH) >= 14) {
+            if (LeftDistance.getDistance(DistanceUnit.INCH) >= 17) {
                 return Util.Exit.ExitState;
             }
 
