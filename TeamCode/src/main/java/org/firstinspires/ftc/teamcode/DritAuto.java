@@ -81,7 +81,7 @@ public class DritAuto extends LinearOpMode {
     private BNO055IMU   imu_1;
     private BNO055IMU   imu;
 
-    PIDController pidDrive = new PIDController(0.5, 0.05, 0.01);
+    PIDController pidDrive = new PIDController(0.5, 0, 0);
     double        globalAngle, correction;
     Orientation   lastAngles = new Orientation();
 
@@ -115,7 +115,7 @@ public class DritAuto extends LinearOpMode {
     private static int valMid = -1;
     private static int valLeft = -1;
     private static int valRight = -1;
-    private static String SkyStonePos;
+    private static String SkyStonePos = "hi";
 
     private static float rectHeight = .6f/8f;
     private static float rectWidth = 1.5f/8f;
@@ -202,24 +202,29 @@ public class DritAuto extends LinearOpMode {
 
             telemetry.update();
 
-        }
+         }
 
         runtime.reset();
         if(opModeIsActive()) {
-            if(SkyStonePos == "Left") {
+            pidDrive.reset();
+
+            if (SkyStonePos.equals("Left")) {
+                DriveWithLeftDistance(LEFT, 0.4, 23);
+            } else if (SkyStonePos.equals("Right")) {
+                DriveWithLeftDistance(RIGHT, 0.4, 38);
+            } else if (SkyStonePos.equals("Center")) {
 
             }
-            if(SkyStonePos == "Center") {
 
-            }
-            if(SkyStonePos == "Right") {
+            DriveWithBackDistance(FORWARD, 0.3, 12);
 
-            }
+            DriveWithPID(RIGHT, 0.6, 1000);
+            DriveWithRightDistance(RIGHT, 0.5, 18);
         }
 
     }
 
-    private void StartMotors(int Direction,  double Power)
+    private void StartMotors (int Direction,  double Power)
     {
         LeftForward.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         RightForward.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -272,7 +277,7 @@ public class DritAuto extends LinearOpMode {
         }
     }
 
-    private void DriveWithPID(int direction, double power, int TargetPosition)
+    private void DriveWithPID (int direction, double power, int TargetPosition)
     {
         LeftForward.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         RightForward.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -347,9 +352,121 @@ public class DritAuto extends LinearOpMode {
             telemetry.addData("TargetPos", LeftForward.getTargetPosition());
             telemetry.addData("reached TargetPos?", Math.abs(LeftForward.getCurrentPosition()) < Math.abs(LeftForward.getTargetPosition()));
             telemetry.update();
-
-
         }
+        sleep(100);
+    }
+
+    private void DriveWithBackDistance (int direction, double power, double  inches) {
+        if (direction == FORWARD) {
+        while(opModeIsActive() && BackDistance.getDistance(DistanceUnit.INCH) < inches) {
+            correction = pidDrive.performPID(getAngle());
+            LeftForward.setPower(-power - correction);
+            LeftBack.setPower(-power - correction);
+            RightForward.setPower(power - correction);
+            RightBack.setPower(power - correction);
+
+            telemetry.addData("correction", correction);
+            telemetry.addData("LeftForward", LeftForward.getPower());
+            telemetry.addData("RightForward", RightForward.getPower());
+            telemetry.addData("LeftBack", LeftBack.getPower());
+            telemetry.addData("RightBack", RightBack.getPower());
+            telemetry.addData("BackDistance", BackDistance.getDistance(DistanceUnit.INCH));
+            telemetry.update();
+        }
+    } else if (direction == BACKWARD) {
+        while(opModeIsActive() && BackDistance.getDistance(DistanceUnit.INCH) > inches) {
+            correction = pidDrive.performPID(getAngle());
+            LeftForward.setPower(power - correction);
+            LeftBack.setPower(power - correction);
+            RightForward.setPower(-power - correction);
+            RightBack.setPower(-power - correction);
+
+            telemetry.addData("correction", correction);
+            telemetry.addData("LeftForward", LeftForward.getPower());
+            telemetry.addData("RightForward", RightForward.getPower());
+            telemetry.addData("LeftBack", LeftBack.getPower());
+            telemetry.addData("RightBack", RightBack.getPower());
+            telemetry.addData("BackDistance", BackDistance.getDistance(DistanceUnit.INCH));
+            telemetry.update();
+        }
+    }
+
+    sleep(100);
+    }
+
+    private void DriveWithRightDistance (int direction, double power, double  inches) {
+        if (direction == LEFT) {
+            while(opModeIsActive() && RightDistance.getDistance(DistanceUnit.INCH) < inches) {
+                correction = pidDrive.performPID(getAngle());
+                LeftForward.setPower(power - correction);
+                LeftBack.setPower(-power - correction);
+                RightForward.setPower(power - correction);
+                RightBack.setPower(-power - correction);
+
+                telemetry.addData("correction", correction);
+                telemetry.addData("LeftForward", LeftForward.getPower());
+                telemetry.addData("RightForward", RightForward.getPower());
+                telemetry.addData("LeftBack", LeftBack.getPower());
+                telemetry.addData("RightBack", RightBack.getPower());
+                telemetry.addData("RightDistance", RightDistance.getDistance(DistanceUnit.INCH));
+                telemetry.update();
+            }
+        } else if (direction == RIGHT) {
+            while(opModeIsActive() && RightDistance.getDistance(DistanceUnit.INCH) > inches) {
+                correction = pidDrive.performPID(getAngle());
+                LeftForward.setPower(-power - correction);
+                LeftBack.setPower(power - correction);
+                RightForward.setPower(-power - correction);
+                RightBack.setPower(power - correction);
+
+                telemetry.addData("correction", correction);
+                telemetry.addData("LeftForward", LeftForward.getPower());
+                telemetry.addData("RightForward", RightForward.getPower());
+                telemetry.addData("LeftBack", LeftBack.getPower());
+                telemetry.addData("RightBack", RightBack.getPower());
+                telemetry.addData("RightDistance", RightDistance.getDistance(DistanceUnit.INCH));
+                telemetry.update();
+            }
+        }
+
+        sleep(100);
+    }
+
+    private void DriveWithLeftDistance (int direction, double power, double  inches) {
+        if (direction == LEFT) {
+            while(opModeIsActive() && LeftDistance.getDistance(DistanceUnit.INCH) > inches) {
+                correction = pidDrive.performPID(getAngle());
+                LeftForward.setPower(power - correction);
+                LeftBack.setPower(-power - correction);
+                RightForward.setPower(power - correction);
+                RightBack.setPower(-power - correction);
+
+                telemetry.addData("correction", correction);
+                telemetry.addData("LeftForward", LeftForward.getPower());
+                telemetry.addData("RightForward", RightForward.getPower());
+                telemetry.addData("LeftBack", LeftBack.getPower());
+                telemetry.addData("RightBack", RightBack.getPower());
+                telemetry.addData("RightDistance", LeftDistance.getDistance(DistanceUnit.INCH));
+                telemetry.update();
+            }
+        } else if (direction == RIGHT) {
+            while(opModeIsActive() && LeftDistance.getDistance(DistanceUnit.INCH) < inches) {
+                correction = pidDrive.performPID(getAngle());
+                LeftForward.setPower(-power - correction);
+                LeftBack.setPower(power - correction);
+                RightForward.setPower(-power - correction);
+                RightBack.setPower(power - correction);
+
+                telemetry.addData("correction", correction);
+                telemetry.addData("LeftForward", LeftForward.getPower());
+                telemetry.addData("RightForward", RightForward.getPower());
+                telemetry.addData("LeftBack", LeftBack.getPower());
+                telemetry.addData("RightBack", RightBack.getPower());
+                telemetry.addData("RightDistance", LeftDistance.getDistance(DistanceUnit.INCH));
+                telemetry.update();
+            }
+        }
+
         sleep(100);
     }
 

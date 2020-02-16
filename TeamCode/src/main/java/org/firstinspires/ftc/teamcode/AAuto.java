@@ -432,17 +432,17 @@ public class AAuto extends OpMode {
     private void DriveWithPID(int direction, double power) {
         if (direction == RIGHT) {
             correction = pidDrive.performPID(getAngle());
-            LeftForward.setPower(-power);
-            LeftBack.setPower(power);
-            RightForward.setPower(-power);
-            RightBack.setPower(power);
+            LeftForward.setPower(-power - correction);
+            LeftBack.setPower(power - correction);
+            RightForward.setPower(-power - correction);
+            RightBack.setPower(power - correction);
 
         } else if (direction == LEFT) {
             correction = pidDrive.performPID(getAngle());
-            LeftForward.setPower(power - correction);
-            LeftBack.setPower(-power - correction);
-            RightForward.setPower(power - correction);
-            RightBack.setPower(-power - correction);
+            LeftForward.setPower(power + correction);
+            LeftBack.setPower(-power + correction);
+            RightForward.setPower(power + correction);
+            RightBack.setPower(-power + correction);
 
         } else if (direction == BACKWARD) {
             correction = pidDrive.performPID(getAngle());
@@ -501,7 +501,7 @@ public class AAuto extends OpMode {
 
         runtime.reset();
 
-        pidDrive = new PIDController(0.19, 0.165, 0);
+        pidDrive = new PIDController(0.33, 0.08, 0.005);
         pidDrive.setSetpoint(0);
         pidDrive.setInputRange(-90, 90);
         pidDrive.enable();
