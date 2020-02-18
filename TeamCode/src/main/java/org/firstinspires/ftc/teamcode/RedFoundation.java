@@ -53,10 +53,10 @@ import java.util.List;
  * monitor: 640 x 480
  *YES
  */
-@Autonomous(name= "DritAuto", group="Sky autonomous")
+@Autonomous(name= "RedFoundation", group="Sky autonomous")
 
 //@Disabled//comment out this line before using
-public class DritAuto extends LinearOpMode {
+public class RedFoundation extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
 
     //0 means skystone, 1 means yellow stone
@@ -191,11 +191,11 @@ public class DritAuto extends LinearOpMode {
         LeftBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         RightBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        RightForward.setDirection(DcMotorSimple.Direction.REVERSE);
-        RightBack.setDirection(DcMotorSimple.Direction.REVERSE);
+        LeftForward.setDirection(DcMotorSimple.Direction.REVERSE);
+        LeftBack.setDirection(DcMotorSimple.Direction.REVERSE);
 
         BackTurner.setPosition(0);
-        BackClamper.setPosition(1);
+        BackClamper.setPosition(0);
 
         while (!(isStopRequested() || isStarted())) {
 
@@ -237,63 +237,33 @@ public class DritAuto extends LinearOpMode {
             LeftpidDrive.reset();
             pidDrive.reset();
 
-            if (SkyStonePos.equals("Left")) {
-                DriveWithLeftDistance(LEFT, 0.5, 23);
-            } else if (SkyStonePos.equals("Right")) {
-                DriveWithLeftDistance(RIGHT, 0.5, 38);
-            } else if (SkyStonePos.equals("Center")) {
+            DriveWithRightDistance(RIGHT, 0.4, 12);
 
-            }
-
-            DriveWithBackDistance(FORWARD, 0.3, 18);
-
-            //Arm Down
-            BackTurner.setPosition(0.5);
-            BackClamper.setPosition(0.6);
-            sleep(600);
-            //clamp
-            BackClamper.setPosition(1);
-            sleep(500);
-            //arm up
-            BackTurner.setPosition(0);
-            sleep(500);
-
-            DriveWithBackDistance(BACKWARD, 0.3, 14);
-
-            DriveWithPID(RIGHT, 0.6, 1000);
-            DriveWithRightDistance(RIGHT, 0.5, 18);
-
-            StartMotors(FORWARD, 0.4);
-            while(!(RFBumper.isPressed() && LFBumper.isPressed())) {
-                telemetry.addData("not touched", "not pressed");
+            StartMotors(FORWARD, 0.5);
+            timer.reset();
+            while((!(LFBumper.isPressed() || RFBumper.isPressed())) || timer.seconds() >= 3) {
+                telemetry.addData("not pressed", "wait");
                 telemetry.update();
             }
             StopDrive();
-/*
-            //Arm Down
-            BackTurner.setPosition(0.55);
-            //unclamp
-            BackClamper.setPosition(0.3);
-            //arm up
-            BackTurner.setPosition(0);*/
+
+            LeftFoundation.setPosition(0.03);
+            RightFoundation.setPosition(0.97);
+            sleep(1000);
+
+            StartMotors(BACKWARD, 0.5);
+            timer.reset();
+            while((!(LBBumper.isPressed() || RBBumper.isPressed())) || timer.seconds() >= 3) {
+                telemetry.addData("not pressed", "wait");
+                telemetry.update();
+            }
+            StopDrive();
+
+            LeftFoundation.setPosition(0.3);
+            RightFoundation.setPosition(0.6);
+            sleep(700);
 
             DriveWithPID(LEFT, 0.6, 1500);
-            if(SkyStonePos == "Left")
-                DriveWithLeftDistance(LEFT, 0.4, 2);
-            if(SkyStonePos == "Center")
-                DriveWithLeftDistance(LEFT, 0.4, 10);
-            if(SkyStonePos == "Right")
-                DriveWithLeftDistance(LEFT, 0.4, 22);
-
-            DriveWithBackDistance(FORWARD, 0.3, 18);
-
-            //Arm Down
-            //clamp
-            //arm up
-
-            DriveWithPID(RIGHT, 0.6, 1800);
-
-
 
         }
 
@@ -323,14 +293,14 @@ public class DritAuto extends LinearOpMode {
         THRESH = ALL_THRESH;
         if (Direction == FORWARD) {
             RightForward.setPower(Power);
-            LeftBack.setPower(-Power);
-            LeftForward.setPower(-Power);
+            LeftBack.setPower(Power);
+            LeftForward.setPower(Power);
             RightBack.setPower(Power);
         }
         else if (Direction == BACKWARD) {
             RightForward.setPower(-Power);
-            LeftBack.setPower(Power);
-            LeftForward.setPower(Power);
+            LeftBack.setPower(-Power);
+            LeftForward.setPower(-Power);
             RightBack.setPower(-Power);
         }
         else if (Direction == LEFT) {

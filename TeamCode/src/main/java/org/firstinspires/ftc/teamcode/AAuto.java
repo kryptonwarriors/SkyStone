@@ -93,6 +93,9 @@ public class AAuto extends OpMode {
     private static Servo LeftFoundation = null;
     private static Servo RightClamp = null;
     private static Servo RightFoundation = null;
+    private static Servo Cap = null;
+    private static Servo BackTurner = null;
+    private static Servo BackClamper = null;
 
     private static DistanceSensor LeftDistance = null;
     private static DistanceSensor RightDistance = null;
@@ -328,6 +331,9 @@ public class AAuto extends OpMode {
         RightFoundation = hardwareMap.servo.get("RightFoundation");
         LeftClamp = hardwareMap.servo.get("LeftClamp");
         RightClamp = hardwareMap.servo.get("RightClamp");
+        Cap = hardwareMap.servo.get("Cap");
+        BackTurner = hardwareMap.servo.get("BackTurner");
+        BackClamper = hardwareMap.servo.get("BackClamper");
 
         LeftDistance = hardwareMap.get(DistanceSensor.class, "LeftDistance");
         RightDistance = hardwareMap.get(DistanceSensor.class, "RightDistance");
