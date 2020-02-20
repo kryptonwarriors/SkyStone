@@ -70,10 +70,7 @@ public class Dritonomous extends LinearOpMode {
     private static DcMotor LeftCascade = null;
     private static DcMotor RightCascade = null;
 
-    private static Servo LeftClamp = null;
-    private static Servo LeftFoundation = null;
-    private static Servo RightClamp = null;
-    private static Servo RightFoundation = null;
+
     private static Servo BackTurner = null;
     private static Servo BackClamper = null;
 
@@ -144,10 +141,8 @@ public class Dritonomous extends LinearOpMode {
         LBBumper = hardwareMap.get(RevTouchSensor.class, "LBBumper");
         RBBumper = hardwareMap.get(RevTouchSensor.class, "RBBumper");
 
-        LeftFoundation = hardwareMap.servo.get("LeftFoundation");
-        RightFoundation = hardwareMap.servo.get("RightFoundation");
-        LeftClamp = hardwareMap.servo.get("LeftClamp");
-        RightClamp = hardwareMap.servo.get("RightClamp");
+
+
         BackTurner = hardwareMap.servo.get("BackTurner");
         BackClamper = hardwareMap.servo.get("BackClamper");
 
@@ -161,7 +156,7 @@ public class Dritonomous extends LinearOpMode {
         RightBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         RightForward.setDirection(DcMotorSimple.Direction.REVERSE);
-        RightBack.setDirection(DcMotorSimple.Direction.REVERSE);
+        LeftBack.setDirection(DcMotorSimple.Direction.REVERSE);
 
         BackTurner.setPosition(0);
         BackClamper.setPosition(1);
@@ -172,15 +167,15 @@ public class Dritonomous extends LinearOpMode {
         runtime.reset();
         if(opModeIsActive()) {
 
-            RightpidDrive = new PIDController(0.5, 0.05, 0.005);
+            RightpidDrive = new PIDController(0.2, 0, 0);
             RightpidDrive.setSetpoint(0);
             RightpidDrive.setInputRange(-90, 90);
             RightpidDrive.enable();
-            LeftpidDrive = new PIDController(0.5,0.01,0.001);
+            LeftpidDrive = new PIDController(0.2,0,0);
             LeftpidDrive.setSetpoint(0);
             LeftpidDrive.setInputRange(-90, 90);
             LeftpidDrive.enable();
-            pidDrive = new PIDController(0.35,0.05,0.005);
+            pidDrive = new PIDController(0.1,0,0);
             pidDrive.setSetpoint(0);
             pidDrive.setInputRange(-90, 90);
             pidDrive.enable();
@@ -191,12 +186,11 @@ public class Dritonomous extends LinearOpMode {
 
 
             DriveWithBackDistance(FORWARD, 0.3, 18);
-            DriveWithPID(FORWARD, 0.3, 400);
-
             //Arm Down
             BackTurner.setPosition(0.5);
             BackClamper.setPosition(0.6);
             sleep(600);
+            DriveWithPID(FORWARD, 0.3, 200);
             //clamp
             BackClamper.setPosition(1);
             sleep(500);
@@ -204,36 +198,37 @@ public class Dritonomous extends LinearOpMode {
             BackTurner.setPosition(0);
             sleep(500);
 
-            DriveWithBackDistance(BACKWARD, 0.3, 14);
+            DriveWithPID(BACKWARD, 0.3, 400);
 
-            DriveWithPID(RIGHT, 0.6, 1000);
-            DriveWithRightDistance(RIGHT, 0.5, 18);
+            sleep(500);
+
+            DriveWithPID(RIGHT, 0.5, 2000);
 
             StartMotors(FORWARD, 0.4);
-            while(!(RFBumper.isPressed() && LFBumper.isPressed())) {
+            while(!(RBBumper.isPressed() || LBBumper.isPressed())) {
                 telemetry.addData("not touched", "not pressed");
                 telemetry.update();
             }
             StopDrive();
-/*
-            //Arm Down
+
+            //Arm down
             BackTurner.setPosition(0.55);
+            sleep(500);
             //unclamp
             BackClamper.setPosition(0.3);
+            sleep(700);
+
+            DriveWithPID(BACKWARD, 0.3, 100);
+
             //arm up
-            BackTurner.setPosition(0);*/
+            BackClamper.setPosition(1);
+            sleep(500);
+            BackTurner.setPosition(0);
+            sleep(500);
 
-            DriveWithLeftDistance(LEFT, 0.4, 10);
+            DriveWithBackDistance(BACKWARD, 0.3, 6);
 
-
-            DriveWithBackDistance(FORWARD, 0.3, 18);
-
-            //Arm Down
-            //clamp
-            //arm up
-
-            DriveWithPID(RIGHT, 0.6, 1800);
-
+            DriveWithPID(LEFT, 0.4, 950);
 
 
         }
@@ -264,8 +259,8 @@ public class Dritonomous extends LinearOpMode {
         THRESH = ALL_THRESH;
         if (Direction == FORWARD) {
             RightForward.setPower(Power);
-            LeftBack.setPower(-Power);
-            LeftForward.setPower(-Power);
+            LeftBack.setPower(Power);
+            LeftForward.setPower(Power);
             RightBack.setPower(Power);
         }
         else if (Direction == BACKWARD) {
