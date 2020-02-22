@@ -53,10 +53,10 @@ import java.util.List;
  * monitor: 640 x 480
  *YES
  */
-@Autonomous(name= "DritAuto", group="Sky autonomous")
+@Autonomous(name= "RealAuto", group="Sky autonomous")
 
 //@Disabled//comment out this line before using
-public class DritAuto extends LinearOpMode {
+public class RealAuto extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
 
     //0 means skystone, 1 means yellow stone
@@ -191,11 +191,12 @@ public class DritAuto extends LinearOpMode {
         LeftBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         RightBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        RightForward.setDirection(DcMotorSimple.Direction.REVERSE);
+        LeftForward.setDirection(DcMotorSimple.Direction.REVERSE);
         RightBack.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        BackTurner.setPosition(0);
-        BackClamper.setPosition(1);
+
+         BackTurner.setPosition(0);
+         BackClamper.setPosition(1);
 
         while (!(isStopRequested() || isStarted())) {
 
@@ -207,7 +208,9 @@ public class DritAuto extends LinearOpMode {
             } else if (valRight == 0) {
                 SkyStonePos = "Right";
             }
-
+            telemetry.addData("LeftDistance", LeftDistance.getDistance(DistanceUnit.INCH));
+            telemetry.addData("RightDistance", RightDistance.getDistance(DistanceUnit.INCH));
+            telemetry.addData("BackDistance", BackDistance.getDistance(DistanceUnit.INCH));
             telemetry.addData("Values", valLeft+"   "+valMid+"   "+valRight);
             telemetry.addData("SkyStonePos", SkyStonePos);
             telemetry.addData("Height", rows);
@@ -220,22 +223,26 @@ public class DritAuto extends LinearOpMode {
         runtime.reset();
         if(opModeIsActive()) {
 
-            RightpidDrive = new PIDController(0.5, 0.05, 0.005);
+            //Arm Down
+            BackTurner.setPosition(0.6);
+            BackClamper.setPosition(0.1);
+
+            RightpidDrive = new PIDController(0.5, 0.01, 0.001);
             RightpidDrive.setSetpoint(0);
             RightpidDrive.setInputRange(-90, 90);
             RightpidDrive.enable();
-            LeftpidDrive = new PIDController(0.5,0.01,0.001);
+            LeftpidDrive = new PIDController(0.5,0.05,0.005);
             LeftpidDrive.setSetpoint(0);
             LeftpidDrive.setInputRange(-90, 90);
             LeftpidDrive.enable();
-            pidDrive = new PIDController(0.35,0.05,0.005);
+            /*pidDrive = new PIDController(0.35,0.05,0.005);
             pidDrive.setSetpoint(0);
             pidDrive.setInputRange(-90, 90);
-            pidDrive.enable();
+            pidDrive.enable();*/
 
             RightpidDrive.reset();
             LeftpidDrive.reset();
-            pidDrive.reset();
+            // pidDrive.reset();
 
             if (SkyStonePos.equals("Left")) {
                 DriveWithLeftDistance(LEFT, 0.5, 23);
@@ -245,26 +252,24 @@ public class DritAuto extends LinearOpMode {
 
             }
 
-            DriveWithBackDistance(FORWARD, 0.3, 18);
+            DriveWithBackDistance(BACKWARD, 0.3, 28.2);
 
-            //Arm Down
-            BackTurner.setPosition(0.5);
-            BackClamper.setPosition(0.6);
-            sleep(600);
             //clamp
             BackClamper.setPosition(1);
-            sleep(500);
+            sleep(1000);
+
             //arm up
             BackTurner.setPosition(0);
             sleep(500);
-
-            DriveWithBackDistance(BACKWARD, 0.3, 14);
-
-            DriveWithPID(RIGHT, 0.6, 1000);
-            DriveWithRightDistance(RIGHT, 0.5, 18);
-
-            StartMotors(FORWARD, 0.4);
-            while(!(RFBumper.isPressed() && LFBumper.isPressed())) {
+            DriveWithPID(FORWARD, 0.3, 10);
+            //DriveWithLeftDistance(LEFT, 0.3, 18);
+            //StartMotors(BACKWARD, 0.4);
+            RightpidDrive.reset();
+            DriveLeftPid(200, 0.4);
+            sleep(3000);
+            DriveWithPID(BACKWARD, 0.4, 300);
+            while(!(RBBumper.isPressed() && LBBumper.isPressed())) {
+                DriveWithPID(BACKWARD, 0.2, 100);
                 telemetry.addData("not touched", "not pressed");
                 telemetry.update();
             }
@@ -277,7 +282,7 @@ public class DritAuto extends LinearOpMode {
             //arm up
             BackTurner.setPosition(0);*/
 
-            DriveWithPID(LEFT, 0.6, 1500);
+            /*DriveWithPID(LEFT, 0.6, 1500);
             if(SkyStonePos == "Left")
                 DriveWithLeftDistance(LEFT, 0.4, 2);
             if(SkyStonePos == "Center")
@@ -285,14 +290,14 @@ public class DritAuto extends LinearOpMode {
             if(SkyStonePos == "Right")
                 DriveWithLeftDistance(LEFT, 0.4, 22);
 
-            DriveWithBackDistance(FORWARD, 0.3, 18);
+            DriveWithBackDistance(BACKWARD, 0.3, 18);
 
             //Arm Down
             //clamp
             //arm up
 
             DriveWithPID(RIGHT, 0.6, 1800);
-
+*/
 
 
         }
@@ -300,14 +305,7 @@ public class DritAuto extends LinearOpMode {
     }
 
 
-
-
-
-
-
-
     //FUNCTIONS
-
     private void StartMotors (int Direction,  double Power)
     {
         LeftForward.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -394,18 +392,18 @@ public class DritAuto extends LinearOpMode {
             LBpower = -power;
             RBpower = -power;
         } else if (direction == LEFT) {
-            LeftForward.setTargetPosition(TargetPosition);
+            LeftForward.setTargetPosition(-TargetPosition);
             RightForward.setTargetPosition(TargetPosition);
-            LeftBack.setTargetPosition(-TargetPosition);
+            LeftBack.setTargetPosition(TargetPosition);
             RightBack.setTargetPosition(-TargetPosition);
             LFpower = -power;
             RFpower = power;
             LBpower = power;
             RBpower = -power;
         } else if (direction == RIGHT) {
-            LeftForward.setTargetPosition(-TargetPosition);
+            LeftForward.setTargetPosition(TargetPosition);
             RightForward.setTargetPosition(-TargetPosition);
-            LeftBack.setTargetPosition(TargetPosition);
+            LeftBack.setTargetPosition(-TargetPosition);
             RightBack.setTargetPosition(TargetPosition);
             LFpower = power;
             RFpower = -power;
@@ -426,7 +424,7 @@ public class DritAuto extends LinearOpMode {
             if(direction == LEFT)
                 correction = LeftpidDrive.performPID(getAngle());
             else
-                correction = pidDrive.performPID(getAngle());
+                correction = RightpidDrive.performPID(getAngle());
             LeftForward.setPower(LFpower - correction);
             LeftBack.setPower(LBpower - correction);
             RightForward.setPower(RFpower - correction);
@@ -448,7 +446,8 @@ public class DritAuto extends LinearOpMode {
     private void DriveWithBackDistance (int direction, double power, double  inches) {
         if (direction == FORWARD) {
             while(opModeIsActive() && BackDistance.getDistance(DistanceUnit.INCH) < inches) {
-                correction = pidDrive.performPID(getAngle());
+                correction = RightpidDrive.performPID(getAngle());
+
                 LeftForward.setPower(power - correction);
                 LeftBack.setPower(power - correction);
                 RightForward.setPower(power - correction);
@@ -463,8 +462,8 @@ public class DritAuto extends LinearOpMode {
                 telemetry.update();
             }
         } else if (direction == BACKWARD) {
-            while(opModeIsActive() && BackDistance.getDistance(DistanceUnit.INCH) > inches) {
-                correction = pidDrive.performPID(getAngle());
+            while(opModeIsActive() && BackDistance.getDistance(DistanceUnit.INCH) < inches) {
+                correction = RightpidDrive.performPID(getAngle());
                 LeftForward.setPower(-power - correction);
                 LeftBack.setPower(-power - correction);
                 RightForward.setPower(-power - correction);
@@ -499,6 +498,7 @@ public class DritAuto extends LinearOpMode {
                 telemetry.addData("LeftBack", LeftBack.getPower());
                 telemetry.addData("RightBack", RightBack.getPower());
                 telemetry.addData("RightDistance", RightDistance.getDistance(DistanceUnit.INCH));
+                telemetry.addData("LeftDistance", LeftDistance.getDistance(DistanceUnit.INCH));
                 telemetry.update();
             }
         } else if (direction == RIGHT) {
@@ -522,7 +522,23 @@ public class DritAuto extends LinearOpMode {
         StopDrive();
         sleep(200);
     }
+    private void DriveLeftPid ( int TargetPos, double power) {
+        while(opModeIsActive() && LeftForward.getCurrentPosition() >= LeftForward.getTargetPosition()) {
+            correction = LeftpidDrive.performPID(getAngle());
+            LeftForward.setPower(-power - correction);
+            LeftBack.setPower(power - correction);
+            RightForward.setPower(power - correction);
+            RightBack.setPower(-power - correction);
 
+            telemetry.addData("correction", correction);
+            telemetry.addData("LeftForward", LeftForward.getPower());
+            telemetry.addData("RightForward", RightForward.getPower());
+            telemetry.addData("LeftBack", LeftBack.getPower());
+            telemetry.addData("RightBack", RightBack.getPower());
+            telemetry.addData("RightDistance", LeftDistance.getDistance(DistanceUnit.INCH));
+            telemetry.update();
+        }
+    }
     private void DriveWithLeftDistance (int direction, double power, double  inches) {
         if (direction == LEFT) {
             while(opModeIsActive() && LeftDistance.getDistance(DistanceUnit.INCH) > inches) {
