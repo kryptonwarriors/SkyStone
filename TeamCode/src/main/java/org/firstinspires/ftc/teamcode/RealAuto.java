@@ -71,11 +71,12 @@ public class RealAuto extends LinearOpMode {
     private static DcMotor RightCascade = null;
 
     private static Servo LeftClamp = null;
-    private static Servo LeftFoundation = null;
     private static Servo RightClamp = null;
-    private static Servo RightFoundation = null;
-    private static Servo BackTurner = null;
-    private static Servo BackClamper = null;
+    private static Servo RightTurner = null;
+    private static Servo RightClamper = null;
+    private static Servo LeftTurner = null;
+    private static Servo LeftClamper = null;
+
 
     private static DistanceSensor LeftDistance = null;
     private static DistanceSensor RightDistance = null;
@@ -87,6 +88,7 @@ public class RealAuto extends LinearOpMode {
     PIDController pidDrive;
     PIDController RightpidDrive;
     PIDController LeftpidDrive;
+    PIDController testPIDDrive;
     double        globalAngle, correction;
     Orientation   lastAngles = new Orientation();
 
@@ -97,6 +99,7 @@ public class RealAuto extends LinearOpMode {
     private TouchSensor RFBumper;
     private TouchSensor LBBumper;
     private TouchSensor RBBumper;
+    private Orientation angles;
 
     int FORWARD = 0;
     int BACKWARD = 1;
@@ -112,7 +115,7 @@ public class RealAuto extends LinearOpMode {
     int ALL_THRESH = 15;
     int TURNTHRESH = 30;
     double OPTIMUM_POWER = 0.4;
-    double STRAFE_POWER = 0.8;
+    double STRAFE_POWER = 0.7;
 
     public static ElapsedTime timer = new ElapsedTime();
 
@@ -125,7 +128,7 @@ public class RealAuto extends LinearOpMode {
     private static float rectHeight = .6f/8f;
     private static float rectWidth = 1.5f/8f;
 
-    private static float offsetX = 0f/8f;//changing this moves the three rects and the three circles left or right, range : (-2, 2) not inclusive
+    private static float offsetX = -0.5f / 7f;//changing this moves the three rects and the three circles left or right, range : (-2, 2) not inclusive
     private static float offsetY = 0f/8f;//changing this moves the three rects and circles up or down, range: (-4, 4) not inclusive
 
     private static float[] midPos = {4f/8f+offsetX, 4f/8f+offsetY};//0 = col, 1 = row
@@ -160,6 +163,7 @@ public class RealAuto extends LinearOpMode {
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         imu.initialize(imuParameters);
 
+
         LeftForward = hardwareMap.dcMotor.get("LeftForward");
         RightForward = hardwareMap.dcMotor.get("RightForward");
         LeftBack = hardwareMap.dcMotor.get("LeftBack");
@@ -175,30 +179,48 @@ public class RealAuto extends LinearOpMode {
         LBBumper = hardwareMap.get(RevTouchSensor.class, "LBBumper");
         RBBumper = hardwareMap.get(RevTouchSensor.class, "RBBumper");
 
-        LeftFoundation = hardwareMap.servo.get("LeftFoundation");
-        RightFoundation = hardwareMap.servo.get("RightFoundation");
+
         LeftClamp = hardwareMap.servo.get("LeftClamp");
         RightClamp = hardwareMap.servo.get("RightClamp");
-        BackTurner = hardwareMap.servo.get("BackTurner");
-        BackClamper = hardwareMap.servo.get("BackClamper");
+        RightTurner = hardwareMap.servo.get("RightTurner");
+        RightClamper = hardwareMap.servo.get("RightClamper");
+        LeftTurner = hardwareMap.servo.get("LeftTurner");
+        LeftClamper = hardwareMap.servo.get("LeftClamper");
+
+
 
         LeftDistance = hardwareMap.get(DistanceSensor.class, "LeftDistance");
         RightDistance = hardwareMap.get(DistanceSensor.class, "RightDistance");
         BackDistance = hardwareMap.get(DistanceSensor.class, "BackDistance");
 
-        LeftForward.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         RightForward.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        LeftBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         RightBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        LeftForward.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        LeftBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        LeftForward.setDirection(DcMotorSimple.Direction.REVERSE);
-        RightBack.setDirection(DcMotorSimple.Direction.REVERSE);
+        LeftBack.setDirection(DcMotorSimple.Direction.REVERSE);
+        RightForward.setDirection(DcMotorSimple.Direction.REVERSE);
 
 
-         BackTurner.setPosition(0);
-         BackClamper.setPosition(1);
+        RightpidDrive = new PIDController(0.05, 0, 0);
+        RightpidDrive.setSetpoint(0);
+        RightpidDrive.setOutputRange(0, STRAFE_POWER);
+        RightpidDrive.setInputRange(-90, 90);
+        RightpidDrive.enable();
+
+        //Up
+        RightTurner.setPosition(0.4);
+        LeftTurner.setPosition(0.9);
+        RightClamper.setPosition(0);
+        LeftClamper.setPosition(1);
+
+
 
         while (!(isStopRequested() || isStarted())) {
+
+            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            correction = RightpidDrive.performPID(getAngle());
+
 
 
             if (valLeft == 0){
@@ -208,6 +230,10 @@ public class RealAuto extends LinearOpMode {
             } else if (valRight == 0) {
                 SkyStonePos = "Right";
             }
+            telemetry.addData("correction", correction);
+            telemetry.addData("rot about Z", angles.firstAngle);
+            telemetry.addData("rot about Y", angles.secondAngle);
+            telemetry.addData("rot about X", angles.thirdAngle);
             telemetry.addData("LeftDistance", LeftDistance.getDistance(DistanceUnit.INCH));
             telemetry.addData("RightDistance", RightDistance.getDistance(DistanceUnit.INCH));
             telemetry.addData("BackDistance", BackDistance.getDistance(DistanceUnit.INCH));
@@ -221,28 +247,38 @@ public class RealAuto extends LinearOpMode {
         }
 
         runtime.reset();
+
+
         if(opModeIsActive()) {
 
             //Arm Down
-            BackTurner.setPosition(0.6);
-            BackClamper.setPosition(0.1);
+            //BackTurner.setPosition(0.6);
+            //BackClamper.setPosition(0.1);
 
-            RightpidDrive = new PIDController(0.5, 0.01, 0.001);
-            RightpidDrive.setSetpoint(0);
-            RightpidDrive.setInputRange(-90, 90);
-            RightpidDrive.enable();
             LeftpidDrive = new PIDController(0.5,0.05,0.005);
             LeftpidDrive.setSetpoint(0);
+            LeftpidDrive.setOutputRange(0, STRAFE_POWER);
             LeftpidDrive.setInputRange(-90, 90);
             LeftpidDrive.enable();
-            /*pidDrive = new PIDController(0.35,0.05,0.005);
+            pidDrive = new PIDController(0.012, 0.0001, 0);
             pidDrive.setSetpoint(0);
+            pidDrive.setOutputRange(0, STRAFE_POWER);
             pidDrive.setInputRange(-90, 90);
-            pidDrive.enable();*/
+            pidDrive.enable();
+
 
             RightpidDrive.reset();
-            LeftpidDrive.reset();
-            // pidDrive.reset();
+
+            /*
+            StartMotors(LTurn, 0.5);
+            while (getAngle() > -72 && !(isStopRequested())) {
+                telemetry.addData("angle", getAngle());
+                telemetry.update();
+                //if (getAngle() < -80 && () > -100)
+                    //break;
+            }
+            StopDrive();
+                */
 
             if (SkyStonePos.equals("Left")) {
                 DriveWithLeftDistance(LEFT, 0.5, 23);
@@ -252,6 +288,7 @@ public class RealAuto extends LinearOpMode {
 
             }
 
+/*
             DriveWithBackDistance(BACKWARD, 0.3, 28.2);
 
             //clamp
@@ -302,6 +339,15 @@ public class RealAuto extends LinearOpMode {
 
         }
 
+        while (opModeIsActive()) {
+            correction = RightpidDrive.performPID(getAngle());
+            telemetry.addData("correction", correction);
+            telemetry.addData("getAngle", getAngle());
+            telemetry.update();
+
+        }
+
+
     }
 
 
@@ -321,14 +367,14 @@ public class RealAuto extends LinearOpMode {
         THRESH = ALL_THRESH;
         if (Direction == FORWARD) {
             RightForward.setPower(Power);
-            LeftBack.setPower(-Power);
-            LeftForward.setPower(-Power);
+            LeftBack.setPower(Power);
+            LeftForward.setPower(Power);
             RightBack.setPower(Power);
         }
         else if (Direction == BACKWARD) {
             RightForward.setPower(-Power);
-            LeftBack.setPower(Power);
-            LeftForward.setPower(Power);
+            LeftBack.setPower(-Power);
+            LeftForward.setPower(-Power);
             RightBack.setPower(-Power);
         }
         else if (Direction == LEFT) {
@@ -338,22 +384,22 @@ public class RealAuto extends LinearOpMode {
             RightBack.setPower(-Power);
         }
         else if (Direction == RIGHT) {
-            LeftForward.setPower(-Power);
-            LeftBack.setPower(Power);
+            LeftForward.setPower(Power);
+            LeftBack.setPower(-Power);
             RightForward.setPower(-Power);
             RightBack.setPower(Power);
         }
         else if (Direction == RTurn) {
             THRESH = TURNTHRESH;
-            LeftForward.setPower(-Power);
-            LeftBack.setPower(-Power);
+            LeftForward.setPower(Power);
+            LeftBack.setPower(Power);
             RightForward.setPower(-Power);
             RightBack.setPower(-Power);
         }
         else if (Direction == LTurn) {
             THRESH = TURNTHRESH;
-            LeftForward.setPower(Power);
-            LeftBack.setPower(Power);
+            LeftForward.setPower(-Power);
+            LeftBack.setPower(-Power);
             RightForward.setPower(Power);
             RightBack.setPower(Power);
         }
@@ -373,7 +419,7 @@ public class RealAuto extends LinearOpMode {
 
         double LFpower, RFpower, LBpower, RBpower;
 
-        if (direction == FORWARD) {
+        if (direction == BACKWARD) {
             LeftForward.setTargetPosition(-TargetPosition);
             RightForward.setTargetPosition(TargetPosition);
             LeftBack.setTargetPosition(-TargetPosition);
@@ -382,7 +428,7 @@ public class RealAuto extends LinearOpMode {
             RFpower = power;
             LBpower = power;
             RBpower = power;
-        } else if (direction == BACKWARD) {
+        } else if (direction == FORWARD) {
             LeftForward.setTargetPosition(TargetPosition);
             RightForward.setTargetPosition(-TargetPosition);
             LeftBack.setTargetPosition(TargetPosition);
@@ -391,19 +437,19 @@ public class RealAuto extends LinearOpMode {
             RFpower = -power;
             LBpower = -power;
             RBpower = -power;
-        } else if (direction == LEFT) {
-            LeftForward.setTargetPosition(-TargetPosition);
+        } else if (direction == RIGHT) {
+            LeftForward.setTargetPosition(TargetPosition);
             RightForward.setTargetPosition(TargetPosition);
-            LeftBack.setTargetPosition(TargetPosition);
+            LeftBack.setTargetPosition(-TargetPosition);
             RightBack.setTargetPosition(-TargetPosition);
             LFpower = -power;
             RFpower = power;
             LBpower = power;
             RBpower = -power;
-        } else if (direction == RIGHT) {
-            LeftForward.setTargetPosition(TargetPosition);
+        } else if (direction == LEFT) {
+            LeftForward.setTargetPosition(-TargetPosition);
             RightForward.setTargetPosition(-TargetPosition);
-            LeftBack.setTargetPosition(-TargetPosition);
+            LeftBack.setTargetPosition(TargetPosition);
             RightBack.setTargetPosition(TargetPosition);
             LFpower = power;
             RFpower = -power;
@@ -424,7 +470,7 @@ public class RealAuto extends LinearOpMode {
             if(direction == LEFT)
                 correction = LeftpidDrive.performPID(getAngle());
             else
-                correction = RightpidDrive.performPID(getAngle());
+                correction = pidDrive.performPID(getAngle());
             LeftForward.setPower(LFpower - correction);
             LeftBack.setPower(LBpower - correction);
             RightForward.setPower(RFpower - correction);
@@ -487,8 +533,8 @@ public class RealAuto extends LinearOpMode {
         if (direction == LEFT) {
             while(opModeIsActive() && RightDistance.getDistance(DistanceUnit.INCH) < inches) {
                 correction = LeftpidDrive.performPID(getAngle());
-                LeftForward.setPower(-power - correction);
-                LeftBack.setPower(power - correction);
+                LeftForward.setPower(-power + correction);
+                LeftBack.setPower(power + correction);
                 RightForward.setPower(power - correction);
                 RightBack.setPower(-power - correction);
 
@@ -503,12 +549,15 @@ public class RealAuto extends LinearOpMode {
             }
         } else if (direction == RIGHT) {
             while(opModeIsActive() && RightDistance.getDistance(DistanceUnit.INCH) > inches) {
-                correction = RightpidDrive.performPID(getAngle());
-                LeftForward.setPower(power - correction);
-                LeftBack.setPower(-power - correction);
+                correction = pidDrive.performPID(getAngle());
+                LeftForward.setPower(power + correction);
+                LeftBack.setPower(-power + correction);
                 RightForward.setPower(-power - correction);
                 RightBack.setPower(power - correction);
 
+
+                telemetry.addData("globalAngle", globalAngle);
+                telemetry.addData("getAngle", getAngle());
                 telemetry.addData("correction", correction);
                 telemetry.addData("LeftForward", LeftForward.getPower());
                 telemetry.addData("RightForward", RightForward.getPower());
@@ -543,8 +592,8 @@ public class RealAuto extends LinearOpMode {
         if (direction == LEFT) {
             while(opModeIsActive() && LeftDistance.getDistance(DistanceUnit.INCH) > inches) {
                 correction = LeftpidDrive.performPID(getAngle());
-                LeftForward.setPower(-power - correction);
-                LeftBack.setPower(power - correction);
+                LeftForward.setPower(-power + correction);
+                LeftBack.setPower(power + correction);
                 RightForward.setPower(power - correction);
                 RightBack.setPower(-power - correction);
 
@@ -559,8 +608,8 @@ public class RealAuto extends LinearOpMode {
         } else if (direction == RIGHT) {
             while(opModeIsActive() && LeftDistance.getDistance(DistanceUnit.INCH) < inches) {
                 correction = RightpidDrive.performPID(getAngle());
-                LeftForward.setPower(power - correction);
-                LeftBack.setPower(-power - correction);
+                LeftForward.setPower(power + correction);
+                LeftBack.setPower(-power + correction);
                 RightForward.setPower(-power - correction);
                 RightBack.setPower(power - correction);
 
