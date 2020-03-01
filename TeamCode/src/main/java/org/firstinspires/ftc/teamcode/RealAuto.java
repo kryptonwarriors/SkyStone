@@ -41,6 +41,7 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.SplittableRandom;
 
 /**
  * Created by maryjaneb  on 11/13/2016.
@@ -116,6 +117,10 @@ public class RealAuto extends LinearOpMode {
     int TURNTHRESH = 30;
     double OPTIMUM_POWER = 0.4;
     double STRAFE_POWER = 0.7;
+
+    private enum autoServoStates {
+        INIT, GRAB, DROP, AWAY
+    }
 
     public static ElapsedTime timer = new ElapsedTime();
 
@@ -208,12 +213,11 @@ public class RealAuto extends LinearOpMode {
         RightpidDrive.setInputRange(-90, 90);
         RightpidDrive.enable();
 
-        //Up
-        RightTurner.setPosition(0.4);
-        LeftTurner.setPosition(0.9);
-        RightClamper.setPosition(0);
-        LeftClamper.setPosition(1);
 
+        turnServo(autoServoStates.INIT, RIGHT);
+        turnServo(autoServoStates.INIT, LEFT);
+        clampServo(autoServoStates.INIT, LEFT);
+        clampServo(autoServoStates.INIT, RIGHT);
 
 
         while (!(isStopRequested() || isStarted())) {
@@ -234,6 +238,8 @@ public class RealAuto extends LinearOpMode {
             telemetry.addData("rot about Z", angles.firstAngle);
             telemetry.addData("rot about Y", angles.secondAngle);
             telemetry.addData("rot about X", angles.thirdAngle);
+            telemetry.addData("LeftBackBumper", LBBumper.isPressed());
+            telemetry.addData("RightBackBumper", RBBumper.isPressed());
             telemetry.addData("LeftDistance", LeftDistance.getDistance(DistanceUnit.INCH));
             telemetry.addData("RightDistance", RightDistance.getDistance(DistanceUnit.INCH));
             telemetry.addData("BackDistance", BackDistance.getDistance(DistanceUnit.INCH));
@@ -267,9 +273,8 @@ public class RealAuto extends LinearOpMode {
             pidDrive.enable();
 
 
-            RightpidDrive.reset();
 
-            /*
+/*
             StartMotors(LTurn, 0.5);
             while (getAngle() > -72 && !(isStopRequested())) {
                 telemetry.addData("angle", getAngle());
@@ -278,19 +283,129 @@ public class RealAuto extends LinearOpMode {
                     //break;
             }
             StopDrive();
-                */
+
+*/
+
 
             if (SkyStonePos.equals("Left")) {
-                DriveWithLeftDistance(LEFT, 0.5, 23);
+                DriveWithLeftDistance(LEFT, STRAFE_POWER, 23);
             } else if (SkyStonePos.equals("Right")) {
-                DriveWithLeftDistance(RIGHT, 0.5, 38);
+                clampServo(autoServoStates.DROP, LEFT);
+                turnServo(autoServoStates.GRAB, LEFT);
+                sleep(100);
             } else if (SkyStonePos.equals("Center")) {
 
             }
 
-/*
-            DriveWithBackDistance(BACKWARD, 0.3, 28.2);
 
+            DriveWithBackDistance(FORWARD, 0.3, 25);
+
+
+            clampServo(autoServoStates.GRAB, LEFT);
+            sleep(500);
+            turnServo(autoServoStates.AWAY, LEFT);
+            sleep(200);
+
+            DriveWithBackDistance(BACKWARD, 0.3, 4);
+            sleep(50);
+            DriveWithPID(RIGHT, STRAFE_POWER, 700);
+            DriveWithRightDistance(RIGHT, STRAFE_POWER, 28);
+
+            moveUntilBackBumper(OPTIMUM_POWER);
+            turnServo(autoServoStates.GRAB, LEFT);
+            clampServo(autoServoStates.DROP, LEFT);
+            turnServo(autoServoStates.GRAB, RIGHT);
+            sleep(1000);
+
+
+            DriveWithBackDistance(BACKWARD, 0.4, 3);
+            StartMotors(LTurn, 0.4);
+            sleep(800);
+            StopDrive();
+            /*LeftForward.setPower(-0.5);
+            LeftBack.setPower(-0.5);
+            RightForward.setPower(-0.4);
+            RightBack.setPower(-0.4);
+
+            while(opModeIsActive() && BackDistance.getDistance(DistanceUnit.INCH) < 1.5) {
+
+            }
+
+            StopDrive();*/
+
+            turnServo(autoServoStates.AWAY, LEFT);
+            turnServo(autoServoStates.AWAY, RIGHT);
+            clampServo(autoServoStates.INIT, LEFT);
+            clampServo(autoServoStates.INIT, RIGHT);
+            //DriveWithPID(BACKWARD, 0.4, 50);
+            DriveWithPID(LEFT, STRAFE_POWER, 1200);
+            DriveWithLeftDistance(LEFT, STRAFE_POWER, 28);
+            sleep(100);
+
+            /*
+            StartMotors(LTurn, 0.7);
+            while (getAngle() > -86 && !(isStopRequested())) {
+                telemetry.addData("angle", getAngle());
+                telemetry.update();
+                //if (getAngle() < -80 && () > -100)
+                //break;
+            }
+            StopDrive();
+
+*/
+
+
+            clampServo(autoServoStates.DROP, RIGHT);
+            turnServo(autoServoStates.GRAB, RIGHT);
+
+            DriveWithBackDistance(FORWARD, 0.3, 25);
+
+            clampServo(autoServoStates.GRAB, RIGHT);
+            sleep(500);
+            turnServo(autoServoStates.AWAY, RIGHT);
+            sleep(200);
+
+
+            DriveWithBackDistance(BACKWARD, 0.3, 4);
+            sleep(50);
+            DriveWithPID(RIGHT, STRAFE_POWER, 700);
+            DriveWithRightDistance(RIGHT, STRAFE_POWER, 32);
+
+            turnServo(autoServoStates.GRAB, RIGHT);
+            clampServo(autoServoStates.DROP, RIGHT);
+            turnServo(autoServoStates.GRAB, LEFT);
+            sleep(500);
+
+
+            turnServo(autoServoStates.AWAY, LEFT);
+            turnServo(autoServoStates.AWAY, RIGHT);
+            clampServo(autoServoStates.INIT, LEFT);
+            clampServo(autoServoStates.INIT, RIGHT);
+
+            DriveWithPID(LEFT, STRAFE_POWER, 800);
+            StopDrive();
+
+
+//END
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            /*
             //clamp
             BackClamper.setPosition(1);
             sleep(1000);
@@ -352,8 +467,39 @@ public class RealAuto extends LinearOpMode {
 
 
     //FUNCTIONS
+    private void moveUntilBackBumper(double Power) {
+        correction = pidDrive.performPID(getAngle());
+        RightForward.setPower(Power - correction);
+        LeftBack.setPower(Power + correction);
+        LeftForward.setPower(Power + correction);
+        RightBack.setPower(Power - correction);
+        while (!(LBBumper.isPressed() || RBBumper.isPressed())) {
+            telemetry.addData("LeftBackBumper", LBBumper.isPressed());
+            telemetry.addData("RightBackBumper", RBBumper.isPressed());
+            telemetry.addData("correction", correction);
+            telemetry.update();
+        }
+        StopDrive();
+    }
+
+    private void moveUntilFrontBumper(double Power) {
+        correction = pidDrive.performPID(getAngle());
+        RightForward.setPower(-Power - correction);
+        LeftBack.setPower(-Power + correction);
+        LeftForward.setPower(-Power + correction);
+        RightBack.setPower(-Power - correction);
+        while (!(LFBumper.isPressed() || RFBumper.isPressed())) {
+            telemetry.addData("LeftFrontBumper", LFBumper.isPressed());
+            telemetry.addData("RightFrontBumper", RFBumper.isPressed());
+            telemetry.addData("correction", correction);
+            telemetry.update();
+        }
+        StopDrive();
+    }
+
     private void StartMotors (int Direction,  double Power)
     {
+        correction = pidDrive.performPID(getAngle());
         LeftForward.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         RightForward.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         LeftBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -366,10 +512,10 @@ public class RealAuto extends LinearOpMode {
 
         THRESH = ALL_THRESH;
         if (Direction == FORWARD) {
-            RightForward.setPower(Power);
-            LeftBack.setPower(Power);
-            LeftForward.setPower(Power);
-            RightBack.setPower(Power);
+            RightForward.setPower(Power - correction);
+            LeftBack.setPower(Power + correction);
+            LeftForward.setPower(Power + correction);
+            RightBack.setPower(Power - correction);
         }
         else if (Direction == BACKWARD) {
             RightForward.setPower(-Power);
@@ -424,37 +570,37 @@ public class RealAuto extends LinearOpMode {
             RightForward.setTargetPosition(TargetPosition);
             LeftBack.setTargetPosition(-TargetPosition);
             RightBack.setTargetPosition(TargetPosition);
-            LFpower = power;
-            RFpower = power;
-            LBpower = power;
-            RBpower = power;
+            LFpower = -power;
+            RFpower = -power;
+            LBpower = -power;
+            RBpower = -power;
         } else if (direction == FORWARD) {
             LeftForward.setTargetPosition(TargetPosition);
             RightForward.setTargetPosition(-TargetPosition);
             LeftBack.setTargetPosition(TargetPosition);
             RightBack.setTargetPosition(-TargetPosition);
-            LFpower = -power;
-            RFpower = -power;
-            LBpower = -power;
-            RBpower = -power;
+            LFpower = power;
+            RFpower = power;
+            LBpower = power;
+            RBpower = power;
         } else if (direction == RIGHT) {
             LeftForward.setTargetPosition(TargetPosition);
             RightForward.setTargetPosition(TargetPosition);
             LeftBack.setTargetPosition(-TargetPosition);
             RightBack.setTargetPosition(-TargetPosition);
-            LFpower = -power;
-            RFpower = power;
-            LBpower = power;
-            RBpower = -power;
+            LFpower = power;
+            RFpower = -power;
+            LBpower = -power;
+            RBpower = power;
         } else if (direction == LEFT) {
             LeftForward.setTargetPosition(-TargetPosition);
             RightForward.setTargetPosition(-TargetPosition);
             LeftBack.setTargetPosition(TargetPosition);
             RightBack.setTargetPosition(TargetPosition);
-            LFpower = power;
-            RFpower = -power;
-            LBpower = -power;
-            RBpower = power;
+            LFpower = -power;
+            RFpower = power;
+            LBpower = power;
+            RBpower = -power;
         } else {
             LFpower = 0;
             RFpower = 0;
@@ -466,13 +612,13 @@ public class RealAuto extends LinearOpMode {
         while(opModeIsActive() && Math.abs(LeftForward.getCurrentPosition()) < Math.abs(LeftForward.getTargetPosition())) {
 
             if(direction == RIGHT)
-                correction = RightpidDrive.performPID(getAngle());
+                correction = pidDrive.performPID(getAngle());
             if(direction == LEFT)
-                correction = LeftpidDrive.performPID(getAngle());
+                correction = pidDrive.performPID(getAngle());
             else
                 correction = pidDrive.performPID(getAngle());
-            LeftForward.setPower(LFpower - correction);
-            LeftBack.setPower(LBpower - correction);
+            LeftForward.setPower(LFpower + correction);
+            LeftBack.setPower(LBpower + correction);
             RightForward.setPower(RFpower - correction);
             RightBack.setPower(RBpower - correction);
 
@@ -492,10 +638,10 @@ public class RealAuto extends LinearOpMode {
     private void DriveWithBackDistance (int direction, double power, double  inches) {
         if (direction == FORWARD) {
             while(opModeIsActive() && BackDistance.getDistance(DistanceUnit.INCH) < inches) {
-                correction = RightpidDrive.performPID(getAngle());
+                correction = pidDrive.performPID(getAngle());
 
-                LeftForward.setPower(power - correction);
-                LeftBack.setPower(power - correction);
+                LeftForward.setPower(power + correction);
+                LeftBack.setPower(power + correction);
                 RightForward.setPower(power - correction);
                 RightBack.setPower(power - correction);
 
@@ -508,10 +654,10 @@ public class RealAuto extends LinearOpMode {
                 telemetry.update();
             }
         } else if (direction == BACKWARD) {
-            while(opModeIsActive() && BackDistance.getDistance(DistanceUnit.INCH) < inches) {
-                correction = RightpidDrive.performPID(getAngle());
-                LeftForward.setPower(-power - correction);
-                LeftBack.setPower(-power - correction);
+            while (opModeIsActive() && BackDistance.getDistance(DistanceUnit.INCH) > inches) {
+                correction = pidDrive.performPID(getAngle());
+                LeftForward.setPower(-power + correction);
+                LeftBack.setPower(-power + correction);
                 RightForward.setPower(-power - correction);
                 RightBack.setPower(-power - correction);
 
@@ -591,7 +737,7 @@ public class RealAuto extends LinearOpMode {
     private void DriveWithLeftDistance (int direction, double power, double  inches) {
         if (direction == LEFT) {
             while(opModeIsActive() && LeftDistance.getDistance(DistanceUnit.INCH) > inches) {
-                correction = LeftpidDrive.performPID(getAngle());
+                correction = pidDrive.performPID(getAngle());
                 LeftForward.setPower(-power + correction);
                 LeftBack.setPower(power + correction);
                 RightForward.setPower(power - correction);
@@ -607,7 +753,7 @@ public class RealAuto extends LinearOpMode {
             }
         } else if (direction == RIGHT) {
             while(opModeIsActive() && LeftDistance.getDistance(DistanceUnit.INCH) < inches) {
-                correction = RightpidDrive.performPID(getAngle());
+                correction = pidDrive.performPID(getAngle());
                 LeftForward.setPower(power + correction);
                 LeftBack.setPower(-power + correction);
                 RightForward.setPower(-power - correction);
@@ -657,6 +803,49 @@ public class RealAuto extends LinearOpMode {
         RightForward.setPower(0.0);
         RightBack.setPower(0.0);
     }
+
+    private void turnServo(autoServoStates state, int side) {
+
+        if (side == LEFT) {
+            if (state == autoServoStates.INIT) {
+                LeftTurner.setPosition(0.9);
+            } else if (state == autoServoStates.GRAB) {
+                LeftTurner.setPosition(0.2);
+            } else if (state == autoServoStates.AWAY) {
+                LeftTurner.setPosition(0.5);
+            }
+        } else if (side == RIGHT) {
+            if (state == autoServoStates.INIT) {
+                RightTurner.setPosition(0.4);
+            } else if (state == autoServoStates.GRAB) {
+                RightTurner.setPosition(1);
+            } else if (state == autoServoStates.AWAY) {
+                RightTurner.setPosition(0.3);
+            }
+        }
+    }
+
+    private void clampServo(autoServoStates state, int side) {
+
+        if (side == LEFT) {
+            if (state == autoServoStates.INIT) {
+                LeftClamper.setPosition(1);
+            } else if (state == autoServoStates.GRAB) {
+                LeftClamper.setPosition(0.9);
+            } else if (state == autoServoStates.DROP) {
+                LeftClamper.setPosition(0.3);
+            }
+        } else if (side == RIGHT) {
+            if (state == autoServoStates.INIT) {
+                RightClamper.setPosition(0.2);
+            } else if (state == autoServoStates.GRAB) {
+                RightClamper.setPosition(0.3);
+            } else if (state == autoServoStates.DROP) {
+                RightClamper.setPosition(0.7);
+            }
+        }
+    }
+
 
     //detection pipeline
     static class StageSwitchingPipeline extends OpenCvPipeline
