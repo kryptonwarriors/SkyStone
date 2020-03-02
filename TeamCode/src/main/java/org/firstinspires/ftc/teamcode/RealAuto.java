@@ -88,6 +88,7 @@ public class RealAuto extends LinearOpMode {
 
     PIDController pidDrive;
     PIDController RightpidDrive;
+    PIDController ForwardpidDrive;
     PIDController LeftpidDrive;
     PIDController testPIDDrive;
     double        globalAngle, correction;
@@ -116,7 +117,7 @@ public class RealAuto extends LinearOpMode {
     int ALL_THRESH = 15;
     int TURNTHRESH = 30;
     double OPTIMUM_POWER = 0.4;
-    double STRAFE_POWER = 0.7;
+    double STRAFE_POWER = 0.75;
 
     private enum autoServoStates {
         INIT, GRAB, DROP, AWAY
@@ -261,11 +262,11 @@ public class RealAuto extends LinearOpMode {
             //BackTurner.setPosition(0.6);
             //BackClamper.setPosition(0.1);
 
-            LeftpidDrive = new PIDController(0.5,0.05,0.005);
-            LeftpidDrive.setSetpoint(0);
-            LeftpidDrive.setOutputRange(0, STRAFE_POWER);
-            LeftpidDrive.setInputRange(-90, 90);
-            LeftpidDrive.enable();
+            ForwardpidDrive = new PIDController(0.005, 0, 0);
+            ForwardpidDrive.setSetpoint(0);
+            ForwardpidDrive.setOutputRange(0, STRAFE_POWER);
+            ForwardpidDrive.setInputRange(-90, 90);
+            ForwardpidDrive.enable();
             pidDrive = new PIDController(0.012, 0.0001, 0);
             pidDrive.setSetpoint(0);
             pidDrive.setOutputRange(0, STRAFE_POWER);
@@ -292,98 +293,153 @@ public class RealAuto extends LinearOpMode {
             } else if (SkyStonePos.equals("Right")) {
                 clampServo(autoServoStates.DROP, LEFT);
                 turnServo(autoServoStates.GRAB, LEFT);
+
+                DriveWithBackDistance(FORWARD, 0.3, 25);
+
+
+                clampServo(autoServoStates.GRAB, LEFT);
+                sleep(500);
+                turnServo(autoServoStates.AWAY, LEFT);
+                sleep(200);
+
+                DriveWithBackDistance(BACKWARD, 0.3, 6);
+                sleep(50);
+                DriveWithPID(RIGHT, STRAFE_POWER, 700);
+                DriveWithRightDistance(RIGHT, STRAFE_POWER, 26);
+                sleep(50);
+                moveUntilBackBumper(0.3);
+                turnServo(autoServoStates.GRAB, LEFT);
+                clampServo(autoServoStates.DROP, LEFT);
+                turnServo(autoServoStates.GRAB, RIGHT);
+                sleep(600);
+
+                DriveWithBackDistance(BACKWARD, 0.4, 1.5);
+
+                // DriveWithRightDistance(LEFT, STRAFE_POWER, 28);
+
+                StartMotors(LTurn, 0.4);
+                sleep(700);
+                StopDrive();
+
+                turnServo(autoServoStates.AWAY, LEFT);
+                turnServo(autoServoStates.AWAY, RIGHT);
+                clampServo(autoServoStates.INIT, LEFT);
+                clampServo(autoServoStates.INIT, RIGHT);
+
+
+                DriveWithPID(LEFT, STRAFE_POWER, 1200);
+                DriveWithLeftDistance(LEFT, STRAFE_POWER, 32);
+
+
+                clampServo(autoServoStates.DROP, RIGHT);
+                turnServo(autoServoStates.GRAB, RIGHT);
+
+                DriveWithBackDistance(FORWARD, 0.3, 25.5);
+
+                clampServo(autoServoStates.GRAB, RIGHT);
+                sleep(500);
+                turnServo(autoServoStates.AWAY, RIGHT);
+                sleep(200);
+
+
+                DriveWithBackDistance(BACKWARD, 0.3, 4);
+                sleep(50);
+                DriveWithPID(RIGHT, STRAFE_POWER, 700);
+                DriveWithRightDistance(RIGHT, STRAFE_POWER, 28);
+
+                turnServo(autoServoStates.GRAB, RIGHT);
+                clampServo(autoServoStates.DROP, RIGHT);
+                turnServo(autoServoStates.GRAB, LEFT);
+                sleep(400);
+
+
+                turnServo(autoServoStates.AWAY, LEFT);
+                turnServo(autoServoStates.AWAY, RIGHT);
+                clampServo(autoServoStates.INIT, LEFT);
+                clampServo(autoServoStates.INIT, RIGHT);
+
+                DriveWithPID(LEFT, STRAFE_POWER, 950);
+                StopDrive();
                 sleep(100);
             } else if (SkyStonePos.equals("Center")) {
 
+                clampServo(autoServoStates.DROP, RIGHT);
+                turnServo(autoServoStates.GRAB, RIGHT);
+
+
+                DriveWithBackDistance(FORWARD, 0.3, 25);
+
+
+                clampServo(autoServoStates.GRAB, RIGHT);
+                sleep(500);
+                turnServo(autoServoStates.AWAY, RIGHT);
+                sleep(200);
+
+                DriveWithBackDistance(BACKWARD, 0.3, 6);
+                sleep(50);
+                DriveWithPID(RIGHT, STRAFE_POWER, 700);
+                DriveWithRightDistance(RIGHT, STRAFE_POWER, 26);
+                sleep(50);
+                moveUntilBackBumper(0.3);
+                turnServo(autoServoStates.GRAB, RIGHT);
+                clampServo(autoServoStates.DROP, RIGHT);
+                turnServo(autoServoStates.GRAB, LEFT);
+                sleep(600);
+
+                DriveWithBackDistance(BACKWARD, 0.4, 1.5);
+
+                // DriveWithRightDistance(LEFT, STRAFE_POWER, 28);
+
+                StartMotors(LTurn, 0.4);
+                sleep(700);
+                StopDrive();
+
+                turnServo(autoServoStates.AWAY, LEFT);
+                turnServo(autoServoStates.AWAY, RIGHT);
+                clampServo(autoServoStates.INIT, LEFT);
+                clampServo(autoServoStates.INIT, RIGHT);
+
+
+                DriveWithPID(LEFT, STRAFE_POWER, 1200);
+                DriveWithLeftDistance(LEFT, STRAFE_POWER, 22);
+                StopDrive();
+
+
+                clampServo(autoServoStates.DROP, RIGHT);
+                turnServo(autoServoStates.GRAB, RIGHT);
+
+                DriveWithBackDistance(FORWARD, 0.3, 25.5);
+
+                clampServo(autoServoStates.GRAB, RIGHT);
+                sleep(500);
+                turnServo(autoServoStates.AWAY, RIGHT);
+                sleep(200);
+
+
+                DriveWithBackDistance(BACKWARD, 0.3, 4);
+                sleep(50);
+                DriveWithPID(RIGHT, STRAFE_POWER, 700);
+                DriveWithRightDistance(RIGHT, STRAFE_POWER, 28);
+
+                turnServo(autoServoStates.GRAB, RIGHT);
+                clampServo(autoServoStates.DROP, RIGHT);
+                turnServo(autoServoStates.GRAB, LEFT);
+                sleep(400);
+
+
+                turnServo(autoServoStates.AWAY, LEFT);
+                turnServo(autoServoStates.AWAY, RIGHT);
+                clampServo(autoServoStates.INIT, LEFT);
+                clampServo(autoServoStates.INIT, RIGHT);
+
+                DriveWithPID(LEFT, STRAFE_POWER, 950);
+                StopDrive();
+
+
             }
 
 
-            DriveWithBackDistance(FORWARD, 0.3, 25);
 
-
-            clampServo(autoServoStates.GRAB, LEFT);
-            sleep(500);
-            turnServo(autoServoStates.AWAY, LEFT);
-            sleep(200);
-
-            DriveWithBackDistance(BACKWARD, 0.3, 4);
-            sleep(50);
-            DriveWithPID(RIGHT, STRAFE_POWER, 700);
-            DriveWithRightDistance(RIGHT, STRAFE_POWER, 28);
-
-            moveUntilBackBumper(OPTIMUM_POWER);
-            turnServo(autoServoStates.GRAB, LEFT);
-            clampServo(autoServoStates.DROP, LEFT);
-            turnServo(autoServoStates.GRAB, RIGHT);
-            sleep(1000);
-
-
-            DriveWithBackDistance(BACKWARD, 0.4, 3);
-            StartMotors(LTurn, 0.4);
-            sleep(800);
-            StopDrive();
-            /*LeftForward.setPower(-0.5);
-            LeftBack.setPower(-0.5);
-            RightForward.setPower(-0.4);
-            RightBack.setPower(-0.4);
-
-            while(opModeIsActive() && BackDistance.getDistance(DistanceUnit.INCH) < 1.5) {
-
-            }
-
-            StopDrive();*/
-
-            turnServo(autoServoStates.AWAY, LEFT);
-            turnServo(autoServoStates.AWAY, RIGHT);
-            clampServo(autoServoStates.INIT, LEFT);
-            clampServo(autoServoStates.INIT, RIGHT);
-            //DriveWithPID(BACKWARD, 0.4, 50);
-            DriveWithPID(LEFT, STRAFE_POWER, 1200);
-            DriveWithLeftDistance(LEFT, STRAFE_POWER, 28);
-            sleep(100);
-
-            /*
-            StartMotors(LTurn, 0.7);
-            while (getAngle() > -86 && !(isStopRequested())) {
-                telemetry.addData("angle", getAngle());
-                telemetry.update();
-                //if (getAngle() < -80 && () > -100)
-                //break;
-            }
-            StopDrive();
-
-*/
-
-
-            clampServo(autoServoStates.DROP, RIGHT);
-            turnServo(autoServoStates.GRAB, RIGHT);
-
-            DriveWithBackDistance(FORWARD, 0.3, 25);
-
-            clampServo(autoServoStates.GRAB, RIGHT);
-            sleep(500);
-            turnServo(autoServoStates.AWAY, RIGHT);
-            sleep(200);
-
-
-            DriveWithBackDistance(BACKWARD, 0.3, 4);
-            sleep(50);
-            DriveWithPID(RIGHT, STRAFE_POWER, 700);
-            DriveWithRightDistance(RIGHT, STRAFE_POWER, 32);
-
-            turnServo(autoServoStates.GRAB, RIGHT);
-            clampServo(autoServoStates.DROP, RIGHT);
-            turnServo(autoServoStates.GRAB, LEFT);
-            sleep(500);
-
-
-            turnServo(autoServoStates.AWAY, LEFT);
-            turnServo(autoServoStates.AWAY, RIGHT);
-            clampServo(autoServoStates.INIT, LEFT);
-            clampServo(autoServoStates.INIT, RIGHT);
-
-            DriveWithPID(LEFT, STRAFE_POWER, 800);
-            StopDrive();
 
 
 //END
@@ -468,7 +524,7 @@ public class RealAuto extends LinearOpMode {
 
     //FUNCTIONS
     private void moveUntilBackBumper(double Power) {
-        correction = pidDrive.performPID(getAngle());
+        correction = ForwardpidDrive.performPID(getAngle());
         RightForward.setPower(Power - correction);
         LeftBack.setPower(Power + correction);
         LeftForward.setPower(Power + correction);
@@ -678,7 +734,7 @@ public class RealAuto extends LinearOpMode {
     private void DriveWithRightDistance (int direction, double power, double  inches) {
         if (direction == LEFT) {
             while(opModeIsActive() && RightDistance.getDistance(DistanceUnit.INCH) < inches) {
-                correction = LeftpidDrive.performPID(getAngle());
+                correction = pidDrive.performPID(getAngle());
                 LeftForward.setPower(-power + correction);
                 LeftBack.setPower(power + correction);
                 RightForward.setPower(power - correction);
@@ -810,9 +866,9 @@ public class RealAuto extends LinearOpMode {
             if (state == autoServoStates.INIT) {
                 LeftTurner.setPosition(0.9);
             } else if (state == autoServoStates.GRAB) {
-                LeftTurner.setPosition(0.2);
+                LeftTurner.setPosition(0.15);
             } else if (state == autoServoStates.AWAY) {
-                LeftTurner.setPosition(0.5);
+                LeftTurner.setPosition(0.4);
             }
         } else if (side == RIGHT) {
             if (state == autoServoStates.INIT) {
@@ -820,7 +876,7 @@ public class RealAuto extends LinearOpMode {
             } else if (state == autoServoStates.GRAB) {
                 RightTurner.setPosition(1);
             } else if (state == autoServoStates.AWAY) {
-                RightTurner.setPosition(0.3);
+                RightTurner.setPosition(0.7);
             }
         }
     }
@@ -839,9 +895,9 @@ public class RealAuto extends LinearOpMode {
             if (state == autoServoStates.INIT) {
                 RightClamper.setPosition(0.2);
             } else if (state == autoServoStates.GRAB) {
-                RightClamper.setPosition(0.3);
+                RightClamper.setPosition(0.2);
             } else if (state == autoServoStates.DROP) {
-                RightClamper.setPosition(0.7);
+                RightClamper.setPosition(0.65);
             }
         }
     }

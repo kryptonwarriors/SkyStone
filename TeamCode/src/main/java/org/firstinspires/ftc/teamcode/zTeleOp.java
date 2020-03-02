@@ -16,6 +16,7 @@ public class zTeleOp extends LinearOpMode {
     private DcMotor RightForward, RightBack, LeftForward, LeftBack;
     private DcMotor LeftCascade, RightCascade;
     private DcMotor LinearActuator;
+    private DcMotor Tape;
     private Servo RightClamp, LeftClamp, RightTurner, RightClamper, LeftTurner, LeftClamper, BackClamper;
     private ElapsedTime runtime = new ElapsedTime();
     private double Multiplier = 0.7;
@@ -45,6 +46,7 @@ public class zTeleOp extends LinearOpMode {
         RightCascade = hardwareMap.dcMotor.get("RightCascade");
         LeftCascade = hardwareMap.dcMotor.get("LeftCascade");
         LinearActuator = hardwareMap.dcMotor.get("LinearActuator");
+        Tape = hardwareMap.dcMotor.get("Tape");
 
 
         RightForward.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -100,11 +102,16 @@ public class zTeleOp extends LinearOpMode {
                     RightForward.setPower(0.8);
                     LeftForward.setPower(-0.8);
                     LeftBack.setPower(-0.8);
+                } else if (gamepad1.dpad_up) {
+                    Tape.setPower(0.8);
+                } else if (gamepad1.dpad_down) {
+                    Tape.setPower(-0.8);
                 } else {
                     RightBack.setPower(Multiplier * Scale(gamepad1.right_stick_y));
                     RightForward.setPower(Multiplier * Scale(gamepad1.right_stick_y));
                     LeftForward.setPower(Multiplier * Scale(gamepad1.left_stick_y));
                     LeftBack.setPower(Multiplier * Scale(gamepad1.left_stick_y));
+                    Tape.setPower(0);
                 }
                 if (gamepad2.a == true) {
 
