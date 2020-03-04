@@ -115,13 +115,13 @@ public class zTeleOp extends LinearOpMode {
                 }
                 if (gamepad2.a == true) {
 
-                    RightClamp.setPosition(0.15);
-                    LeftClamp.setPosition(0.9);
+                    RightClamp.setPosition(0.06);
+                    LeftClamp.setPosition(0.8);
                     // Clamp in & CLOSE
                 }
                 if (gamepad2.b == true) {
 
-                    RightClamp.setPosition(0.45);
+                    RightClamp.setPosition(0.4);
                     LeftClamp.setPosition(0.6);
                     // Clamp out & OPEN
                 }
