@@ -16,7 +16,7 @@ public class KevinTeleOp extends LinearOpMode {
   private DcMotor RightForward, RightBack, LeftForward, LeftBack;
   private DcMotor LeftCascade, RightCascade;
   private DcMotor LinearActuator;
-  private Servo LeftClamp, RightClamp, BackTurner, BackClamper;
+  private Servo LeftClamp, RightClamp, RightTurner, LeftTurner, RightClamper, LeftClamper;
   private ElapsedTime runtime = new ElapsedTime();
   private double Multiplier = 0.7;
   private double StrafeMultiplier = -0.8;
@@ -35,8 +35,10 @@ public class KevinTeleOp extends LinearOpMode {
     LeftBack = hardwareMap.dcMotor.get("LeftBack");
     LeftClamp = hardwareMap.servo.get("LeftClamp");
     RightClamp = hardwareMap.servo.get("RightClamp");
-    BackTurner = hardwareMap.servo. get("BackTurner");
-    BackClamper = hardwareMap.servo.get("BackClamper");
+    RightTurner = hardwareMap.servo. get("RightTurner");
+    RightClamper = hardwareMap.servo.get("RightClamper");
+    LeftTurner = hardwareMap.servo. get("LeftTurner");
+    LeftClamper = hardwareMap.servo.get("LeftClamper");
     RightCascade = hardwareMap.dcMotor.get("RightCascade");
     LeftCascade = hardwareMap.dcMotor.get("LeftCascade");
     LinearActuator = hardwareMap.dcMotor.get("LinearActuator");
@@ -102,8 +104,8 @@ public class KevinTeleOp extends LinearOpMode {
         LeftBack.setPower(Multiplier * Scale(gamepad1.left_stick_y));
       }
       if (gamepad2.a == true) {
-        LeftClamp.setPosition(1);
-        RightClamp.setPosition(0.1);
+        LeftClamp.setPosition(0.9);
+        RightClamp.setPosition(0.3);
           // Clamp in & CLOSE
       }
       if (gamepad2.b == true) {
@@ -129,17 +131,16 @@ public class KevinTeleOp extends LinearOpMode {
           LeftCascade.setPower(0);
           RightCascade.setPower(0);*/
           //Grab Stone
-          BackTurner.setPosition(0.5);
-          
+          //BackTurner.setPosition(0.5);
           //Down to Grab Stone
-          BackClamper.setPosition(1);
+          //BackClamper.setPosition(1);
         }
         if (gamepad2.right_bumper == true) {
           //Up
-          BackClamper.setPosition(0.6);
+          //BackClamper.setPosition(0.6);
         }
         if (gamepad2.dpad_up) {
-          BackTurner.setPosition(0);
+          //BackTurner.setPosition(0);
         }
         
         LinearActuator.setPower(gamepad2.right_stick_y * -0.75);
