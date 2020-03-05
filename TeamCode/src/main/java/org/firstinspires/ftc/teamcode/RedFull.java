@@ -45,19 +45,19 @@ import java.util.SplittableRandom;
 
 /**
  * Created by maryjaneb  on 11/13/2016.
- *
+ * <p>
  * nerverest ticks
  * 60 1680
  * 40 1120
  * 20 560
- *
+ * <p>
  * monitor: 640 x 480
- *YES
+ * YES
  */
-@Autonomous(name= "RealAuto", group="Sky autonomous")
+@Autonomous(name = "RedFull", group = "Sky autonomous")
 
 //@Disabled//comment out this line before using
-public class RealAuto extends LinearOpMode {
+public class RedFull extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
 
     //0 means skystone, 1 means yellow stone
@@ -84,15 +84,15 @@ public class RealAuto extends LinearOpMode {
     private static DistanceSensor BackDistance = null;
 
 
-    private BNO055IMU   imu;
+    private BNO055IMU imu;
 
     PIDController pidDrive;
     PIDController RightpidDrive;
     PIDController ForwardpidDrive;
     PIDController LeftpidDrive;
     PIDController testPIDDrive;
-    double        globalAngle, correction;
-    Orientation   lastAngles = new Orientation();
+    double globalAngle, correction;
+    Orientation lastAngles = new Orientation();
 
     private ColorSensor Color;
     private Blinker Control_Hub;
@@ -131,15 +131,15 @@ public class RealAuto extends LinearOpMode {
     private static int valRight = -1;
     private static String SkyStonePos;
 
-    private static float rectHeight = .6f/8f;
-    private static float rectWidth = 1.5f/8f;
+    private static float rectHeight = .6f / 8f;
+    private static float rectWidth = 1.5f / 8f;
 
     private static float offsetX = -0.5f / 7f;//changing this moves the three rects and the three circles left or right, range : (-2, 2) not inclusive
-    private static float offsetY = 0f/8f;//changing this moves the three rects and circles up or down, range: (-4, 4) not inclusive
+    private static float offsetY = 0f / 8f;//changing this moves the three rects and circles up or down, range: (-4, 4) not inclusive
 
-    private static float[] midPos = {4f/8f+offsetX, 4f/8f+offsetY};//0 = col, 1 = row
-    private static float[] leftPos = {2f/8f+offsetX, 4f/8f+offsetY};
-    private static float[] rightPos = {6f/8f+offsetX, 4f/8f+offsetY};
+    private static float[] midPos = {4f / 8f + offsetX, 4f / 8f + offsetY};//0 = col, 1 = row
+    private static float[] leftPos = {2f / 8f + offsetX, 4f / 8f + offsetY};
+    private static float[] rightPos = {6f / 8f + offsetX, 4f / 8f + offsetY};
     //moves all rectangles right or left by amount. units are in ratio to monitor
 
     private final int rows = 640;
@@ -163,9 +163,9 @@ public class RealAuto extends LinearOpMode {
         //width = height in this case, because camera is in portrait mode.
 
         BNO055IMU.Parameters imuParameters = new BNO055IMU.Parameters();
-        imuParameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
-        imuParameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-        imuParameters.loggingEnabled      = false;
+        imuParameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
+        imuParameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+        imuParameters.loggingEnabled = false;
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         imu.initialize(imuParameters);
 
@@ -194,7 +194,6 @@ public class RealAuto extends LinearOpMode {
         LeftClamper = hardwareMap.servo.get("LeftClamper");
 
 
-
         LeftDistance = hardwareMap.get(DistanceSensor.class, "LeftDistance");
         RightDistance = hardwareMap.get(DistanceSensor.class, "RightDistance");
         BackDistance = hardwareMap.get(DistanceSensor.class, "BackDistance");
@@ -215,7 +214,6 @@ public class RealAuto extends LinearOpMode {
         RightpidDrive.enable();
 
 
-
         turnServo(autoServoStates.INIT, RIGHT);
         turnServo(autoServoStates.INIT, LEFT);
         clampServo(autoServoStates.INIT, LEFT);
@@ -228,8 +226,7 @@ public class RealAuto extends LinearOpMode {
             correction = RightpidDrive.performPID(getAngle());
 
 
-
-            if (valLeft == 0){
+            if (valLeft == 0) {
                 SkyStonePos = "Left";
             } else if (valMid == 0) {
                 SkyStonePos = "Center";
@@ -245,7 +242,7 @@ public class RealAuto extends LinearOpMode {
             telemetry.addData("LeftDistance", LeftDistance.getDistance(DistanceUnit.INCH));
             telemetry.addData("RightDistance", RightDistance.getDistance(DistanceUnit.INCH));
             telemetry.addData("BackDistance", BackDistance.getDistance(DistanceUnit.INCH));
-            telemetry.addData("Values", valLeft+"   "+valMid+"   "+valRight);
+            telemetry.addData("Values", valLeft + "   " + valMid + "   " + valRight);
             telemetry.addData("SkyStonePos", SkyStonePos);
             telemetry.addData("Height", rows);
             telemetry.addData("Width", cols);
@@ -257,13 +254,13 @@ public class RealAuto extends LinearOpMode {
         runtime.reset();
 
 
-        if(opModeIsActive()) {
+        if (opModeIsActive()) {
 
             //Arm Down
             //BackTurner.setPosition(0.6);
             //BackClamper.setPosition(0.1);
 
-            ForwardpidDrive = new PIDController(0.01, 0, 0);
+            ForwardpidDrive = new PIDController(0.005, 0, 0);
             ForwardpidDrive.setSetpoint(0);
             ForwardpidDrive.setOutputRange(0, STRAFE_POWER);
             ForwardpidDrive.setInputRange(-90, 90);
@@ -288,10 +285,7 @@ public class RealAuto extends LinearOpMode {
 
 */
 
-
-            if (SkyStonePos.equals("Left")) {
-                DriveWithLeftDistance(LEFT, STRAFE_POWER, 34);
-
+            if (SkyStonePos == "Center") {
                 clampServo(autoServoStates.DROP, RIGHT);
                 turnServo(autoServoStates.GRAB, RIGHT);
 
@@ -303,217 +297,86 @@ public class RealAuto extends LinearOpMode {
                 sleep(600);
                 turnServo(autoServoStates.AWAY, RIGHT);
                 sleep(200);
-
-                DriveWithBackDistance(BACKWARD, 0.3, 6);
-                sleep(50);
-                DriveWithPID(RIGHT, STRAFE_POWER, 700);
-                DriveWithRightDistance(RIGHT, STRAFE_POWER, 26);
-                sleep(50);
-                moveUntilBackBumper(0.3);
-                turnServo(autoServoStates.GRAB, RIGHT);
-                clampServo(autoServoStates.DROP, RIGHT);
-                turnServo(autoServoStates.GRAB, LEFT);
-                sleep(600);
-
-                DriveWithBackDistance(BACKWARD, 0.4, 1.5);
-
-                // DriveWithRightDistance(LEFT, STRAFE_POWER, 28);
-
-                StartMotors(LTurn, 0.4);
-                sleep(700);
-                StopDrive();
-
-                turnServo(autoServoStates.AWAY, LEFT);
-                turnServo(autoServoStates.AWAY, RIGHT);
-                clampServo(autoServoStates.INIT, LEFT);
-                clampServo(autoServoStates.INIT, RIGHT);
-
-
-                DriveWithPID(LEFT, STRAFE_POWER, 1200);
-                DriveWithLeftDistance(LEFT, STRAFE_POWER, 10);
-                StopDrive();
-
-
-                clampServo(autoServoStates.DROP, RIGHT);
-                turnServo(autoServoStates.GRAB, RIGHT);
-
-                DriveWithBackDistance(FORWARD, 0.3, 25.5);
-
-                clampServo(autoServoStates.GRAB, RIGHT);
-                sleep(600);
-                turnServo(autoServoStates.AWAY, RIGHT);
-                sleep(200);
-
-
-                DriveWithBackDistance(BACKWARD, 0.3, 4);
-                sleep(50);
-                DriveWithPID(RIGHT, STRAFE_POWER, 700);
-                DriveWithRightDistance(RIGHT, STRAFE_POWER, 28);
-
-                turnServo(autoServoStates.GRAB, RIGHT);
-                clampServo(autoServoStates.DROP, RIGHT);
-                turnServo(autoServoStates.GRAB, LEFT);
-                sleep(400);
-
-
-                turnServo(autoServoStates.AWAY, LEFT);
-                turnServo(autoServoStates.AWAY, RIGHT);
-                clampServo(autoServoStates.INIT, LEFT);
-                clampServo(autoServoStates.INIT, RIGHT);
-
-                DriveWithPID(LEFT, STRAFE_POWER, 950);
-                StopDrive();
-            } else if (SkyStonePos.equals("Right")) {
+            } else if (SkyStonePos == "Right") {
                 clampServo(autoServoStates.DROP, LEFT);
                 turnServo(autoServoStates.GRAB, LEFT);
 
                 DriveWithBackDistance(FORWARD, 0.3, 25);
-
 
                 clampServo(autoServoStates.GRAB, LEFT);
                 sleep(600);
                 turnServo(autoServoStates.AWAY, LEFT);
                 sleep(200);
-
-                DriveWithBackDistance(BACKWARD, 0.3, 6);
-                sleep(50);
-                DriveWithPID(RIGHT, STRAFE_POWER, 700);
-                DriveWithRightDistance(RIGHT, STRAFE_POWER, 26);
-                sleep(50);
-                moveUntilBackBumper(0.3);
-                turnServo(autoServoStates.GRAB, LEFT);
-                clampServo(autoServoStates.DROP, LEFT);
-                turnServo(autoServoStates.GRAB, RIGHT);
-                sleep(600);
-
-                DriveWithBackDistance(BACKWARD, 0.4, 1.5);
-
-                // DriveWithRightDistance(LEFT, STRAFE_POWER, 28);
-
-                StartMotors(LTurn, 0.4);
-                sleep(700);
-                StopDrive();
-
-                turnServo(autoServoStates.AWAY, LEFT);
-                turnServo(autoServoStates.AWAY, RIGHT);
-                clampServo(autoServoStates.INIT, LEFT);
-                clampServo(autoServoStates.INIT, RIGHT);
-
-
-                DriveWithPID(LEFT, STRAFE_POWER, 1200);
-                DriveWithLeftDistance(LEFT, STRAFE_POWER, 32);
-
-
-                clampServo(autoServoStates.DROP, RIGHT);
-                turnServo(autoServoStates.GRAB, RIGHT);
-
-                DriveWithBackDistance(FORWARD, 0.3, 25.5);
-
-                clampServo(autoServoStates.GRAB, RIGHT);
-                sleep(600);
-                turnServo(autoServoStates.AWAY, RIGHT);
-                sleep(200);
-
-
-                DriveWithBackDistance(BACKWARD, 0.3, 4);
-                sleep(50);
-                DriveWithPID(RIGHT, STRAFE_POWER, 700);
-                DriveWithRightDistance(RIGHT, STRAFE_POWER, 28);
-
-                turnServo(autoServoStates.GRAB, RIGHT);
-                sleep(180);
-                clampServo(autoServoStates.DROP, RIGHT);
-                turnServo(autoServoStates.GRAB, LEFT);
-                sleep(400);
-
-
-                turnServo(autoServoStates.AWAY, LEFT);
-                turnServo(autoServoStates.AWAY, RIGHT);
-                clampServo(autoServoStates.INIT, LEFT);
-                clampServo(autoServoStates.INIT, RIGHT);
-
-                DriveWithPID(LEFT, STRAFE_POWER, 950);
-                StopDrive();
-                sleep(100);
-            } else if (SkyStonePos.equals("Center")) {
-
-                clampServo(autoServoStates.DROP, RIGHT);
-                turnServo(autoServoStates.GRAB, RIGHT);
-
-
-                DriveWithBackDistance(FORWARD, 0.3, 25);
-
-
-                clampServo(autoServoStates.GRAB, RIGHT);
-                sleep(600);
-                turnServo(autoServoStates.AWAY, RIGHT);
-                sleep(200);
-
-                DriveWithBackDistance(BACKWARD, 0.3, 6);
-                sleep(50);
-                DriveWithPID(RIGHT, STRAFE_POWER, 700);
-                DriveWithRightDistance(RIGHT, STRAFE_POWER, 26);
-                sleep(50);
-                moveUntilBackBumper(0.3);
-                turnServo(autoServoStates.GRAB, RIGHT);
-                clampServo(autoServoStates.DROP, RIGHT);
-                turnServo(autoServoStates.GRAB, LEFT);
-                sleep(600);
-
-                DriveWithBackDistance(BACKWARD, 0.4, 1.5);
-
-                // DriveWithRightDistance(LEFT, STRAFE_POWER, 28);
-
-                StartMotors(LTurn, 0.4);
-                sleep(700);
-                StopDrive();
-
-                turnServo(autoServoStates.AWAY, LEFT);
-                turnServo(autoServoStates.AWAY, RIGHT);
-                clampServo(autoServoStates.INIT, LEFT);
-                clampServo(autoServoStates.INIT, RIGHT);
-
-
-                DriveWithPID(LEFT, STRAFE_POWER, 1200);
-                DriveWithLeftDistance(LEFT, STRAFE_POWER, 24);
-                StopDrive();
-
-
-                clampServo(autoServoStates.DROP, RIGHT);
-                turnServo(autoServoStates.GRAB, RIGHT);
-
-                DriveWithBackDistance(FORWARD, 0.3, 25.5);
-
-                clampServo(autoServoStates.GRAB, RIGHT);
-                sleep(600);
-                turnServo(autoServoStates.AWAY, RIGHT);
-                sleep(200);
-
-
-                DriveWithBackDistance(BACKWARD, 0.3, 4);
-                sleep(50);
-                DriveWithPID(RIGHT, STRAFE_POWER, 700);
-                DriveWithRightDistance(RIGHT, STRAFE_POWER, 28);
-
-                turnServo(autoServoStates.GRAB, RIGHT);
-                clampServo(autoServoStates.DROP, RIGHT);
-                turnServo(autoServoStates.GRAB, LEFT);
-                sleep(400);
-
-
-                turnServo(autoServoStates.AWAY, LEFT);
-                turnServo(autoServoStates.AWAY, RIGHT);
-                clampServo(autoServoStates.INIT, LEFT);
-                clampServo(autoServoStates.INIT, RIGHT);
-
-                DriveWithPID(LEFT, STRAFE_POWER, 950);
-                StopDrive();
-
-
             }
 
 
+            DriveWithBackDistance(BACKWARD, 0.3, 6);
+            sleep(50);
+            DriveWithPID(RIGHT, STRAFE_POWER, 700);
+            DriveWithRightDistance(RIGHT, STRAFE_POWER, 26);
+            sleep(50);
+            moveUntilBackBumper(0.3);
+            if (SkyStonePos == "Center") {
+                turnServo(autoServoStates.GRAB, RIGHT);
+                clampServo(autoServoStates.DROP, RIGHT);
+                turnServo(autoServoStates.GRAB, LEFT);
+            } else if (SkyStonePos == "Right") {
+                turnServo(autoServoStates.GRAB, LEFT);
+                clampServo(autoServoStates.DROP, LEFT);
+                turnServo(autoServoStates.GRAB, RIGHT);
+                sleep(200);
+            }
+            sleep(600);
 
+            DriveWithBackDistance(BACKWARD, 0.4, 1.5);
+
+            // DriveWithRightDistance(LEFT, STRAFE_POWER, 28);
+
+            StartMotors(LTurn, 0.4);
+            sleep(700);
+            StopDrive();
+
+            turnServo(autoServoStates.AWAY, LEFT);
+            turnServo(autoServoStates.AWAY, RIGHT);
+            clampServo(autoServoStates.INIT, LEFT);
+            clampServo(autoServoStates.INIT, RIGHT);
+
+
+            DriveWithPID(LEFT, STRAFE_POWER, 1200);
+            DriveWithLeftDistance(LEFT, STRAFE_POWER, 32);
+
+
+            clampServo(autoServoStates.DROP, RIGHT);
+            turnServo(autoServoStates.GRAB, RIGHT);
+
+            DriveWithBackDistance(FORWARD, 0.3, 25.5);
+
+            clampServo(autoServoStates.GRAB, RIGHT);
+            sleep(600);
+            turnServo(autoServoStates.AWAY, RIGHT);
+            sleep(200);
+
+
+            DriveWithBackDistance(BACKWARD, 0.3, 4);
+            sleep(50);
+            DriveWithPID(RIGHT, STRAFE_POWER, 700);
+            DriveWithRightDistance(RIGHT, STRAFE_POWER, 28);
+
+            turnServo(autoServoStates.GRAB, RIGHT);
+            sleep(180);
+            clampServo(autoServoStates.DROP, RIGHT);
+            turnServo(autoServoStates.GRAB, LEFT);
+            sleep(400);
+
+
+            turnServo(autoServoStates.AWAY, LEFT);
+            turnServo(autoServoStates.AWAY, RIGHT);
+            clampServo(autoServoStates.INIT, LEFT);
+            clampServo(autoServoStates.INIT, RIGHT);
+
+            DriveWithPID(LEFT, STRAFE_POWER, 950);
+            StopDrive();
+            sleep(100);
 
 
 //END
@@ -627,8 +490,7 @@ public class RealAuto extends LinearOpMode {
         StopDrive();
     }
 
-    private void StartMotors (int Direction,  double Power)
-    {
+    private void StartMotors(int Direction, double Power) {
         correction = pidDrive.performPID(getAngle());
         LeftForward.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         RightForward.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -646,33 +508,28 @@ public class RealAuto extends LinearOpMode {
             LeftBack.setPower(Power + correction);
             LeftForward.setPower(Power + correction);
             RightBack.setPower(Power - correction);
-        }
-        else if (Direction == BACKWARD) {
+        } else if (Direction == BACKWARD) {
             RightForward.setPower(-Power);
             LeftBack.setPower(-Power);
             LeftForward.setPower(-Power);
             RightBack.setPower(-Power);
-        }
-        else if (Direction == LEFT) {
+        } else if (Direction == LEFT) {
             LeftForward.setPower(Power);
             LeftBack.setPower(-Power);
             RightForward.setPower(Power);
             RightBack.setPower(-Power);
-        }
-        else if (Direction == RIGHT) {
+        } else if (Direction == RIGHT) {
             LeftForward.setPower(Power);
             LeftBack.setPower(-Power);
             RightForward.setPower(-Power);
             RightBack.setPower(Power);
-        }
-        else if (Direction == RTurn) {
+        } else if (Direction == RTurn) {
             THRESH = TURNTHRESH;
             LeftForward.setPower(Power);
             LeftBack.setPower(Power);
             RightForward.setPower(-Power);
             RightBack.setPower(-Power);
-        }
-        else if (Direction == LTurn) {
+        } else if (Direction == LTurn) {
             THRESH = TURNTHRESH;
             LeftForward.setPower(-Power);
             LeftBack.setPower(-Power);
@@ -681,8 +538,7 @@ public class RealAuto extends LinearOpMode {
         }
     }
 
-    private void DriveWithPID (int direction, double power, int TargetPosition)
-    {
+    private void DriveWithPID(int direction, double power, int TargetPosition) {
         LeftForward.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         RightForward.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         LeftBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -739,11 +595,11 @@ public class RealAuto extends LinearOpMode {
         }
 
         //Math.abs(LeftForward.getCurrentPosition()) < Math.abs(LeftForward.getTargetPosition())
-        while(opModeIsActive() && Math.abs(LeftForward.getCurrentPosition()) < Math.abs(LeftForward.getTargetPosition())) {
+        while (opModeIsActive() && Math.abs(LeftForward.getCurrentPosition()) < Math.abs(LeftForward.getTargetPosition())) {
 
-            if(direction == RIGHT)
+            if (direction == RIGHT)
                 correction = pidDrive.performPID(getAngle());
-            if(direction == LEFT)
+            if (direction == LEFT)
                 correction = pidDrive.performPID(getAngle());
             else
                 correction = pidDrive.performPID(getAngle());
@@ -765,9 +621,9 @@ public class RealAuto extends LinearOpMode {
         sleep(100);
     }
 
-    private void DriveWithBackDistance (int direction, double power, double  inches) {
+    private void DriveWithBackDistance(int direction, double power, double inches) {
         if (direction == FORWARD) {
-            while(opModeIsActive() && BackDistance.getDistance(DistanceUnit.INCH) < inches) {
+            while (opModeIsActive() && BackDistance.getDistance(DistanceUnit.INCH) < inches) {
                 correction = pidDrive.performPID(getAngle());
 
                 LeftForward.setPower(power + correction);
@@ -805,9 +661,9 @@ public class RealAuto extends LinearOpMode {
         sleep(200);
     }
 
-    private void DriveWithRightDistance (int direction, double power, double  inches) {
+    private void DriveWithRightDistance(int direction, double power, double inches) {
         if (direction == LEFT) {
-            while(opModeIsActive() && RightDistance.getDistance(DistanceUnit.INCH) < inches) {
+            while (opModeIsActive() && RightDistance.getDistance(DistanceUnit.INCH) < inches) {
                 correction = pidDrive.performPID(getAngle());
                 LeftForward.setPower(-power + correction);
                 LeftBack.setPower(power + correction);
@@ -824,7 +680,7 @@ public class RealAuto extends LinearOpMode {
                 telemetry.update();
             }
         } else if (direction == RIGHT) {
-            while(opModeIsActive() && RightDistance.getDistance(DistanceUnit.INCH) > inches) {
+            while (opModeIsActive() && RightDistance.getDistance(DistanceUnit.INCH) > inches) {
                 correction = pidDrive.performPID(getAngle());
                 LeftForward.setPower(power + correction);
                 LeftBack.setPower(-power + correction);
@@ -847,8 +703,9 @@ public class RealAuto extends LinearOpMode {
         StopDrive();
         sleep(200);
     }
-    private void DriveLeftPid ( int TargetPos, double power) {
-        while(opModeIsActive() && LeftForward.getCurrentPosition() >= LeftForward.getTargetPosition()) {
+
+    private void DriveLeftPid(int TargetPos, double power) {
+        while (opModeIsActive() && LeftForward.getCurrentPosition() >= LeftForward.getTargetPosition()) {
             correction = LeftpidDrive.performPID(getAngle());
             LeftForward.setPower(-power - correction);
             LeftBack.setPower(power - correction);
@@ -864,9 +721,10 @@ public class RealAuto extends LinearOpMode {
             telemetry.update();
         }
     }
-    private void DriveWithLeftDistance (int direction, double power, double  inches) {
+
+    private void DriveWithLeftDistance(int direction, double power, double inches) {
         if (direction == LEFT) {
-            while(opModeIsActive() && LeftDistance.getDistance(DistanceUnit.INCH) > inches) {
+            while (opModeIsActive() && LeftDistance.getDistance(DistanceUnit.INCH) > inches) {
                 correction = pidDrive.performPID(getAngle());
                 LeftForward.setPower(-power + correction);
                 LeftBack.setPower(power + correction);
@@ -882,7 +740,7 @@ public class RealAuto extends LinearOpMode {
                 telemetry.update();
             }
         } else if (direction == RIGHT) {
-            while(opModeIsActive() && LeftDistance.getDistance(DistanceUnit.INCH) < inches) {
+            while (opModeIsActive() && LeftDistance.getDistance(DistanceUnit.INCH) < inches) {
                 correction = pidDrive.performPID(getAngle());
                 LeftForward.setPower(power + correction);
                 LeftBack.setPower(-power + correction);
@@ -905,10 +763,10 @@ public class RealAuto extends LinearOpMode {
 
     /**
      * Get current cumulative angle rotation from last reset.
+     *
      * @return Angle in degrees. + = left, - = right from zero point.
      */
-    private double getAngle()
-    {
+    private double getAngle() {
 
         Orientation angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
 
@@ -926,8 +784,7 @@ public class RealAuto extends LinearOpMode {
         return globalAngle;
     }
 
-    private void StopDrive()
-    {
+    private void StopDrive() {
         LeftBack.setPower(0.0);
         LeftForward.setPower(0.0);
         RightForward.setPower(0.0);
@@ -978,15 +835,13 @@ public class RealAuto extends LinearOpMode {
 
 
     //detection pipeline
-    static class StageSwitchingPipeline extends OpenCvPipeline
-    {
+    static class StageSwitchingPipeline extends OpenCvPipeline {
         Mat yCbCrChan2Mat = new Mat();
         Mat thresholdMat = new Mat();
         Mat all = new Mat();
         List<MatOfPoint> contoursList = new ArrayList<>();
 
-        enum Stage
-        {//color difference. greyscale
+        enum Stage {//color difference. greyscale
             detection,//includes outlines
             THRESHOLD,//b&w
             RAW_IMAGE,//displays raw view
@@ -996,8 +851,7 @@ public class RealAuto extends LinearOpMode {
         private Stage[] stages = Stage.values();
 
         @Override
-        public void onViewportTapped()
-        {
+        public void onViewportTapped() {
             /*
              * Note that this method is invoked from the UI thread
              * so whatever we do here, we must do quickly.
@@ -1007,8 +861,7 @@ public class RealAuto extends LinearOpMode {
 
             int nextStageNum = currentStageNum + 1;
 
-            if(nextStageNum >= stages.length)
-            {
+            if (nextStageNum >= stages.length) {
                 nextStageNum = 0;
             }
 
@@ -1016,8 +869,7 @@ public class RealAuto extends LinearOpMode {
         }
 
         @Override
-        public Mat processFrame(Mat input)
-        {
+        public Mat processFrame(Mat input) {
             contoursList.clear();
             /*
              * This pipeline finds the contours of yellow blobs such as the Gold Mineral
@@ -1040,73 +892,68 @@ public class RealAuto extends LinearOpMode {
 
 
             //get values from frame
-            double[] pixMid = thresholdMat.get((int)(input.rows()* midPos[1]), (int)(input.cols()* midPos[0]));//gets value at circle
-            valMid = (int)pixMid[0];
+            double[] pixMid = thresholdMat.get((int) (input.rows() * midPos[1]), (int) (input.cols() * midPos[0]));//gets value at circle
+            valMid = (int) pixMid[0];
 
-            double[] pixLeft = thresholdMat.get((int)(input.rows()* leftPos[1]), (int)(input.cols()* leftPos[0]));//gets value at circle
-            valLeft = (int)pixLeft[0];
+            double[] pixLeft = thresholdMat.get((int) (input.rows() * leftPos[1]), (int) (input.cols() * leftPos[0]));//gets value at circle
+            valLeft = (int) pixLeft[0];
 
-            double[] pixRight = thresholdMat.get((int)(input.rows()* rightPos[1]), (int)(input.cols()* rightPos[0]));//gets value at circle
-            valRight = (int)pixRight[0];
+            double[] pixRight = thresholdMat.get((int) (input.rows() * rightPos[1]), (int) (input.cols() * rightPos[0]));//gets value at circle
+            valRight = (int) pixRight[0];
 
             //create three points
-            Point pointMid = new Point((int)(input.cols()* midPos[0]), (int)(input.rows()* midPos[1]));
-            Point pointLeft = new Point((int)(input.cols()* leftPos[0]), (int)(input.rows()* leftPos[1]));
-            Point pointRight = new Point((int)(input.cols()* rightPos[0]), (int)(input.rows()* rightPos[1]));
+            Point pointMid = new Point((int) (input.cols() * midPos[0]), (int) (input.rows() * midPos[1]));
+            Point pointLeft = new Point((int) (input.cols() * leftPos[0]), (int) (input.rows() * leftPos[1]));
+            Point pointRight = new Point((int) (input.cols() * rightPos[0]), (int) (input.rows() * rightPos[1]));
 
             //draw circles on those points
-            Imgproc.circle(all, pointMid,5, new Scalar( 255, 0, 0 ),1 );//draws circle
-            Imgproc.circle(all, pointLeft,5, new Scalar( 255, 0, 0 ),1 );//draws circle
-            Imgproc.circle(all, pointRight,5, new Scalar( 255, 0, 0 ),1 );//draws circle
+            Imgproc.circle(all, pointMid, 5, new Scalar(255, 0, 0), 1);//draws circle
+            Imgproc.circle(all, pointLeft, 5, new Scalar(255, 0, 0), 1);//draws circle
+            Imgproc.circle(all, pointRight, 5, new Scalar(255, 0, 0), 1);//draws circle
 
             //draw 3 rectangles
             Imgproc.rectangle(//1-3
                     all,
                     new Point(
-                            input.cols()*(leftPos[0]-rectWidth/1.5),
-                            input.rows()*(leftPos[1]-rectHeight/.7)),
+                            input.cols() * (leftPos[0] - rectWidth / 1.5),
+                            input.rows() * (leftPos[1] - rectHeight / .7)),
                     new Point(
-                            input.cols()*(leftPos[0]+rectWidth/1.5),
-                            input.rows()*(leftPos[1]+rectHeight/.7)),
+                            input.cols() * (leftPos[0] + rectWidth / 1.5),
+                            input.rows() * (leftPos[1] + rectHeight / .7)),
                     new Scalar(0, 255, 0), 3);
             Imgproc.rectangle(//3-5
                     all,
                     new Point(
-                            input.cols()*(midPos[0]-rectWidth/1.5),
-                            input.rows()*(midPos[1]-rectHeight/.7)),
+                            input.cols() * (midPos[0] - rectWidth / 1.5),
+                            input.rows() * (midPos[1] - rectHeight / .7)),
                     new Point(
-                            input.cols()*(midPos[0]+rectWidth/1.5),
-                            input.rows()*(midPos[1]+rectHeight/.7)),
+                            input.cols() * (midPos[0] + rectWidth / 1.5),
+                            input.rows() * (midPos[1] + rectHeight / .7)),
                     new Scalar(0, 255, 0), 3);
             Imgproc.rectangle(//5-7
                     all,
                     new Point(
-                            input.cols()*(rightPos[0]-rectWidth/1.5),
-                            input.rows()*(rightPos[1]-rectHeight/.7)),
+                            input.cols() * (rightPos[0] - rectWidth / 1.5),
+                            input.rows() * (rightPos[1] - rectHeight / .7)),
                     new Point(
-                            input.cols()*(rightPos[0]+rectWidth/1.5),
-                            input.rows()*(rightPos[1]+rectHeight/.7)),
+                            input.cols() * (rightPos[0] + rectWidth / 1.5),
+                            input.rows() * (rightPos[1] + rectHeight / .7)),
                     new Scalar(0, 255, 0), 3);
 
-            switch (stageToRenderToViewport)
-            {
-                case THRESHOLD:
-                {
+            switch (stageToRenderToViewport) {
+                case THRESHOLD: {
                     return thresholdMat;
                 }
 
-                case detection:
-                {
+                case detection: {
                     return all;
                 }
 
-                case RAW_IMAGE:
-                {
+                case RAW_IMAGE: {
                     return input;
                 }
 
-                default:
-                {
+                default: {
                     return input;
                 }
             }
