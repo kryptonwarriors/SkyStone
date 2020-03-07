@@ -54,10 +54,10 @@ import java.util.SplittableRandom;
  * monitor: 640 x 480
  * YES
  */
-@Autonomous(name = "RedThreeStone", group = "Sky autonomous")
+@Autonomous(name = "SpeedThreeStone", group = "Sky autonomous")
 
 //@Disabled//comment out this line before using
-public class RedThreeStone extends LinearOpMode {
+public class SpeedRedThreeStone extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
 
     //0 means skystone, 1 means yellow stone
@@ -117,7 +117,7 @@ public class RedThreeStone extends LinearOpMode {
     int ALL_THRESH = 15;
     int TURNTHRESH = 30;
     double OPTIMUM_POWER = 0.4;
-    double STRAFE_POWER = 0.75;
+    double STRAFE_POWER = 0.85;
 
     private enum autoServoStates {
         INIT, GRAB, DROP, AWAY
@@ -214,10 +214,10 @@ public class RedThreeStone extends LinearOpMode {
         RightpidDrive.enable();
 
 
-        turnServo(autoServoStates.INIT, RIGHT);
-        turnServo(autoServoStates.INIT, LEFT);
         clampServo(autoServoStates.INIT, LEFT);
         clampServo(autoServoStates.INIT, RIGHT);
+        turnServo(autoServoStates.INIT, RIGHT);
+        turnServo(autoServoStates.INIT, LEFT);
 
 
         while (!(isStopRequested() || isStarted())) {
@@ -297,7 +297,7 @@ public class RedThreeStone extends LinearOpMode {
 
 
                 clampServo(autoServoStates.GRAB, RIGHT);
-                sleep(600);
+                sleep(500);
                 turnServo(autoServoStates.AWAY, RIGHT);
                 sleep(200);
 
@@ -310,7 +310,7 @@ public class RedThreeStone extends LinearOpMode {
                 turnServo(autoServoStates.GRAB, RIGHT);
                 clampServo(autoServoStates.DROP, RIGHT);
                 turnServo(autoServoStates.GRAB, LEFT);
-                sleep(600);
+                sleep(550);
 
                 DriveWithBackDistance(BACKWARD, 0.4, 1.5, 100);
 
@@ -361,16 +361,16 @@ public class RedThreeStone extends LinearOpMode {
                 DriveWithPID(LEFT, STRAFE_POWER, 950);
                 StopDrive();
             } else if (SkyStonePos.equals("Right")) {
-
+//First Stone
                 clampServo(autoServoStates.DROP, LEFT);
                 turnServo(autoServoStates.GRAB, LEFT);
 
 
-                DriveWithBackDistance(FORWARD, 0.3, 25, 300);
+                DriveWithBackDistance(FORWARD, 0.3, 24, 300);
 
 
                 clampServo(autoServoStates.GRAB, LEFT);
-                sleep(600);
+                sleep(400);
                 turnServo(autoServoStates.AWAY, LEFT);
                 sleep(200);
 
@@ -378,33 +378,32 @@ public class RedThreeStone extends LinearOpMode {
                 DriveWithPID(BACKWARD, 0.3, 30);
                 StopDrive();
                 DriveWithPID(RIGHT, STRAFE_POWER, 700);
-                DriveWithRightDistance(RIGHT, STRAFE_POWER, 26);
+                DriveWithRightDistance(RIGHT, STRAFE_POWER, 25);
                 sleep(50);
                 moveUntilBackBumper(0.25);
                 turnServo(autoServoStates.GRAB, LEFT);
+                sleep(100);
                 clampServo(autoServoStates.DROP, LEFT);
-                turnServo(autoServoStates.GRAB, RIGHT);
-                sleep(600);
+                sleep(250);
 
                 turnServo(autoServoStates.INIT, LEFT);
                 turnServo(autoServoStates.INIT, RIGHT);
                 clampServo(autoServoStates.INIT, LEFT);
                 clampServo(autoServoStates.INIT, RIGHT);
 
-                DriveWithPID(BACKWARD, 0.3, 60);
+                DriveWithPID(BACKWARD, 0.4, 30);
                 StopDrive();
-
 
                 DriveWithPID(LEFT, STRAFE_POWER, 1200);
                 clampServo(autoServoStates.DROP, RIGHT);
                 turnServo(autoServoStates.GRAB, RIGHT);
-                DriveWithLeftDistance(LEFT, STRAFE_POWER, 32);
-
+                DriveWithLeftDistance(LEFT, STRAFE_POWER, 35);
+//Second Stone
 
                 DriveWithBackDistance(FORWARD, 0.3, 25.5, 60);
 
                 clampServo(autoServoStates.GRAB, RIGHT);
-                sleep(500);
+                sleep(450);
                 turnServo(autoServoStates.AWAY, RIGHT);
                 sleep(200);
 
@@ -412,29 +411,27 @@ public class RedThreeStone extends LinearOpMode {
                 DriveWithPID(BACKWARD, 0.3, 30);
                 StopDrive();
                 DriveWithPID(RIGHT, STRAFE_POWER, 700);
-                DriveWithRightDistance(RIGHT, STRAFE_POWER, 28);
+                DriveWithRightDistance(RIGHT, STRAFE_POWER, 30);
 
                 moveUntilBackBumper(0.25);
 
                 turnServo(autoServoStates.GRAB, RIGHT);
-                sleep(180);
                 clampServo(autoServoStates.DROP, RIGHT);
-                turnServo(autoServoStates.GRAB, LEFT);
-                sleep(400);
+                sleep(250);
 
 
                 turnServo(autoServoStates.INIT, LEFT);
                 turnServo(autoServoStates.INIT, RIGHT);
                 clampServo(autoServoStates.INIT, LEFT);
                 clampServo(autoServoStates.INIT, RIGHT);
-                DriveWithPID(BACKWARD, 0.3, 55);
+                DriveWithPID(BACKWARD, 0.3, 50);
                 StopDrive();
 
                 DriveWithPID(LEFT, STRAFE_POWER, 1200);
                 clampServo(autoServoStates.DROP, RIGHT);
                 turnServo(autoServoStates.GRAB, RIGHT);
-                DriveWithLeftDistance(LEFT, STRAFE_POWER, 40);
-
+                DriveWithLeftDistance(LEFT, STRAFE_POWER, 26);
+//Third Stone
                 DriveWithBackDistance(FORWARD, 0.3, 27, 50);
 
                 clampServo(autoServoStates.GRAB, RIGHT);
@@ -445,25 +442,33 @@ public class RedThreeStone extends LinearOpMode {
                 DriveWithPID(BACKWARD, 0.3, 40);
                 StopDrive();
                 DriveWithPID(RIGHT, STRAFE_POWER, 700);
-                DriveWithRightDistance(RIGHT, STRAFE_POWER, 28);
+                DriveWithRightDistance(RIGHT, STRAFE_POWER, 26.5);
 
                 moveUntilBackBumper(0.25);
 
                 turnServo(autoServoStates.GRAB, RIGHT);
-                sleep(180);
-                clampServo(autoServoStates.DROP, RIGHT);
                 turnServo(autoServoStates.GRAB, LEFT);
                 sleep(400);
+                clampServo(autoServoStates.DROP, RIGHT);
+                sleep(250);
 
+                //DriveWithPID(BACKWARD,0.4,50);
 
-                turnServo(autoServoStates.AWAY, LEFT);
-                turnServo(autoServoStates.AWAY, RIGHT);
+                moveUntilFrontBumper(0.6);
+                StopDrive();
+
+                StartMotors(LTurn, 0.5);
+                sleep(850);
+                StopDrive();
+
+                turnServo(autoServoStates.INIT, LEFT);
+                turnServo(autoServoStates.INIT, RIGHT);
                 clampServo(autoServoStates.INIT, LEFT);
                 clampServo(autoServoStates.INIT, RIGHT);
-                DriveWithBackDistance(BACKWARD, 0.3, 24, 60);
+                DriveWithPID(LEFT, 1, 1000);
                 StopDrive();
-                DriveWithPID(LEFT, STRAFE_POWER, 850);
-                StopDrive();
+
+
             } else if (SkyStonePos.equals("Center")) {
 
                 clampServo(autoServoStates.DROP, RIGHT);
@@ -519,7 +524,7 @@ public class RedThreeStone extends LinearOpMode {
                 sleep(200);
 
 
-                DriveWithBackDistance(BACKWARD, 0.3, 20, 100);
+                DriveWithPID(BACKWARD, 0.3, 35);
                 sleep(50);
                 DriveWithPID(RIGHT, STRAFE_POWER, 700);
                 DriveWithRightDistance(RIGHT, STRAFE_POWER, 28);
@@ -972,7 +977,7 @@ public class RedThreeStone extends LinearOpMode {
             }
         } else if (side == RIGHT) {
             if (state == autoServoStates.INIT) {
-                RightTurner.setPosition(0.4);
+                RightTurner.setPosition(0.45);
             } else if (state == autoServoStates.GRAB) {
                 RightTurner.setPosition(1);
             } else if (state == autoServoStates.AWAY) {
@@ -989,7 +994,7 @@ public class RedThreeStone extends LinearOpMode {
             } else if (state == autoServoStates.GRAB) {
                 LeftClamper.setPosition(1);
             } else if (state == autoServoStates.DROP) {
-                LeftClamper.setPosition(0.4);
+                LeftClamper.setPosition(0.5);
             }
         } else if (side == RIGHT) {
             if (state == autoServoStates.INIT) {
@@ -997,7 +1002,7 @@ public class RedThreeStone extends LinearOpMode {
             } else if (state == autoServoStates.GRAB) {
                 RightClamper.setPosition(0);
             } else if (state == autoServoStates.DROP) {
-                RightClamper.setPosition(0.4);
+                RightClamper.setPosition(0.43);
             }
         }
     }
