@@ -76,6 +76,7 @@ import java.util.List;
 import static org.firstinspires.ftc.teamcode.opencvSkystoneDetector.StageSwitchingPipeline.Stage.detection;
 
 @Autonomous(name = "AAuto", group = "Iterative Opmode")
+@Disabled
 public class AAuto extends OpMode {
     private static ElapsedTime runtime = new ElapsedTime();
     private Util autoUility;

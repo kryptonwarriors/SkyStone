@@ -54,7 +54,7 @@ import java.util.List;
  *YES
  */
 @Autonomous(name= "RedFoundation", group="Sky autonomous")
-
+@Disabled
 //@Disabled//comment out this line before using
 public class RedFoundation extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();

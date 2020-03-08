@@ -234,9 +234,9 @@ public class SpeedRedThreeStone extends LinearOpMode {
                 SkyStonePos = "Right";
             }
             telemetry.addData("correction", correction);
-            telemetry.addData("rot about Z", angles.firstAngle);
+            /*telemetry.addData("rot about Z", angles.firstAngle);
             telemetry.addData("rot about Y", angles.secondAngle);
-            telemetry.addData("rot about X", angles.thirdAngle);
+            telemetry.addData("rot about X", angles.thirdAngle);*/
             telemetry.addData("LeftBackBumper", LBBumper.isPressed());
             telemetry.addData("RightBackBumper", RBBumper.isPressed());
             telemetry.addData("LeftDistance", LeftDistance.getDistance(DistanceUnit.INCH));
@@ -291,7 +291,6 @@ public class SpeedRedThreeStone extends LinearOpMode {
 
                 clampServo(autoServoStates.DROP, RIGHT);
                 turnServo(autoServoStates.GRAB, RIGHT);
-
 
                 DriveWithBackDistance(FORWARD, 0.3, 25, 300);
 
