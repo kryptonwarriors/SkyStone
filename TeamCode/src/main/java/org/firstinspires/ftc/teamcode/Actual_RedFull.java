@@ -294,7 +294,7 @@ public class Actual_RedFull extends LinearOpMode {
             }
             else if (SkyStonePos.equals("Right")) {
                 Arm1 = LEFT;
-                R1 = 26;
+                R1 = 24;
                 R2 = 30;
                 R3 = 26.5;
                 L1 = 35;
@@ -317,7 +317,7 @@ public class Actual_RedFull extends LinearOpMode {
             sleep(200);
 
 
-            DriveWithPID(BACKWARD, 0.3, 35);
+            DriveWithPID(BACKWARD, 0.3, 40);
             StopDrive();
             DriveWithPID(RIGHT, STRAFE_POWER, 700);
             DriveWithRightDistance(RIGHT, STRAFE_POWER, R1);
@@ -351,7 +351,7 @@ public class Actual_RedFull extends LinearOpMode {
             sleep(200);
 
 
-            DriveWithPID(BACKWARD, 0.3, 30);
+            DriveWithPID(BACKWARD, 0.3, 35);
             StopDrive();
             DriveWithPID(RIGHT, STRAFE_POWER, 700);
             DriveWithRightDistance(RIGHT, STRAFE_POWER, R2);

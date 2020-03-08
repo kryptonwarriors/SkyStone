@@ -72,27 +72,37 @@ public class zTeleOp extends LinearOpMode {
             while (opModeIsActive()) {
                 if (Math.abs(gamepad1.right_trigger) > 0.01) {
                     // Strafing to the Right
-                    LeftForward.setPower(StrafeMultiplier * Scale(gamepad1.right_trigger));
+                    LeftForward.setPower(-0.9 * Scale(gamepad1.right_trigger));
                     LeftBack.setPower(-StrafeMultiplier * Scale(gamepad1.right_trigger));
-                    RightForward.setPower(-StrafeMultiplier * Scale(gamepad1.right_trigger));
+                    RightForward.setPower(0.9 * Scale(gamepad1.right_trigger));
                     RightBack.setPower(StrafeMultiplier * Scale(gamepad1.right_trigger));
                 } else if (Math.abs(gamepad1.left_trigger) > 0.01) {
                     // Strafing to the Left
-                    LeftForward.setPower(-StrafeMultiplier * Scale(gamepad1.left_trigger));
+                    LeftForward.setPower(0.9 * Scale(gamepad1.left_trigger));
                     LeftBack.setPower(StrafeMultiplier * Scale(gamepad1.left_trigger));
-                    RightForward.setPower(StrafeMultiplier * Scale(gamepad1.left_trigger));
+                    RightForward.setPower(-0.9 * Scale(gamepad1.left_trigger));
                     RightBack.setPower(-StrafeMultiplier * Scale(gamepad1.left_trigger));
                 } else if (gamepad1.y) {
-                    RightBack.setPower(-0.4);
-                    RightForward.setPower(-0.4);
-                    LeftForward.setPower(-0.4);
-                    LeftBack.setPower(-0.4);
+                    RightBack.setPower(-0.2);
+                    RightForward.setPower(-0.2);
+                    LeftForward.setPower(-0.2);
+                    LeftBack.setPower(-0.2);
                 } else if (gamepad1.a) {
-                    RightBack.setPower(0.4);
-                    RightForward.setPower(0.4);
-                    LeftForward.setPower(0.4);
-                    LeftBack.setPower(0.4);
-                } else if (gamepad1.right_bumper) {
+                    RightBack.setPower(0.2);
+                    RightForward.setPower(0.2);
+                    LeftForward.setPower(0.2);
+                    LeftBack.setPower(0.2);
+                } else if (gamepad1.x) {
+                    RightBack.setPower(-0.27);
+                    RightForward.setPower(0.27);
+                    LeftForward.setPower(-0.27);
+                    LeftBack.setPower(0.27);
+                } else if (gamepad1.b) {
+                    RightBack.setPower(0.27);
+                    RightForward.setPower(-0.27);
+                    LeftForward.setPower(0.27);
+                    LeftBack.setPower(-0.27);
+                }else if (gamepad1.right_bumper) {
                     RightBack.setPower(-0.8);
                     RightForward.setPower(-0.8);
                     LeftForward.setPower(0.8);
@@ -113,17 +123,17 @@ public class zTeleOp extends LinearOpMode {
                     LeftBack.setPower(Multiplier * Scale(gamepad1.left_stick_y));
                     Tape.setPower(0);
                 }
-                if (gamepad2.a == true) {
-
-                    RightClamp.setPosition(0.06);
-                    LeftClamp.setPosition(0.8);
-                    // Clamp in & CLOSE
-                }
                 if (gamepad2.b == true) {
 
-                    RightClamp.setPosition(0.4);
-                    LeftClamp.setPosition(0.6);
+                    RightClamp.setPosition(0.2);
+                    LeftClamp.setPosition(0.8);
                     // Clamp out & OPEN
+                }
+                if (gamepad2.a == true) {
+
+                    RightClamp.setPosition(0.45);
+                    LeftClamp.setPosition(0.58);
+                    // Clamp in & CLOSE
                 }
      /* if (gamepad2.x == true) {
           LeftFoundation.setPosition(0);
