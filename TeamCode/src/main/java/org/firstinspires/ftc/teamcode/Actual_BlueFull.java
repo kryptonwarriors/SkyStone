@@ -54,10 +54,10 @@ import java.util.SplittableRandom;
  * monitor: 640 x 480
  * YES
  */
-@Autonomous(name = "Actual_RedFull", group = "Sky autonomous")
+@Autonomous(name = "Actual_BlueFull", group = "Sky autonomous")
 
 //@Disabled//comment out this line before using
-public class Actual_RedFull extends LinearOpMode {
+public class Actual_BlueFull extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
 
     //0 means skystone, 1 means yellow stone
@@ -121,8 +121,8 @@ public class Actual_RedFull extends LinearOpMode {
 
 
     int Arm1, Arm2, Arm3, ArmNotActive;
-    double L1, L2;
-    double R1, R2, R3;
+    double L1, L2, L3;
+    double R1, R2;
 
 
     private enum autoServoStates {
@@ -140,7 +140,7 @@ public class Actual_RedFull extends LinearOpMode {
     private static float rectHeight = .6f / 8f;
     private static float rectWidth = 1.5f / 8f;
 
-    private static float offsetX = -1f / 5.7f;//changing this moves the three rects and the three circles left or right, range : (-2, 2) not inclusive
+    private static float offsetX = 1f / 20f;//changing this moves the three rects and the three circles left or right, range : (-2, 2) not inclusive
     private static float offsetY = 0f / 8f;//changing this moves the three rects and circles up or down, range: (-4, 4) not inclusive
 
     private static float[] midPos = {4f / 8f + offsetX, 4f / 8f + offsetY};//0 = col, 1 = row
@@ -273,40 +273,39 @@ public class Actual_RedFull extends LinearOpMode {
 
             Arm1 = RIGHT;
             Arm2 = RIGHT;
-            Arm3 = RIGHT;
-            ArmNotActive = LEFT;
+            Arm3 = LEFT;
+            ArmNotActive = RIGHT;
 
             if (SkyStonePos.equals("Left")) {
-                R1 = 30;
-                L1 = 19;
-                R2 = 27;
-                L2 = 28;
-                R3 = 26.5;
-            }
-            else if (SkyStonePos.equals("Center")) {
-                R1 = 35;
-                L1 = 28;
-                R2 = 29.5;
-                L2 = 46.5;
-                R3 = 26.5;
+                L1 = 44;
+                R1 = 25;
+                L2 = 25;
+                R2 = 42.5;
+                L3 = 35.5;
+            } else if (SkyStonePos.equals("Center")) {
+                Arm1 = LEFT;
+                L1 = 35;
+                R1 = 14;
+                L2 = 27;
+                R2 = 65;
+                L3 = 30;
                 Arm3 = LEFT;
                 ArmNotActive = RIGHT;
-            }
-            else if (SkyStonePos.equals("Right")) {
+            } else if (SkyStonePos.equals("Right")) {
                 Arm1 = LEFT;
-                R1 = 25;
-                R2 = 30;
-                R3 = 28.5;
-                L1 = 35;
-                L2 = 26;
+                L1 = 25;
+                L2 = 30;
+                L3 = 28.5;
+                R1 = 35;
+                R2 = 29;
             }
 
 //First Stone
             clampServo(autoServoStates.DROP, Arm1);
             turnServo(autoServoStates.GRAB, Arm1);
 
-            if(SkyStonePos.equals("Left")) {
-                DriveWithLeftDistance(LEFT, 0.5, 33);
+            if (SkyStonePos.equals("Right")) {
+                DriveWithLeftDistance(RIGHT, 0.5, 33);
             }
             DriveWithBackDistance(FORWARD, 0.3, 24, 300);
 
@@ -319,8 +318,8 @@ public class Actual_RedFull extends LinearOpMode {
 
             DriveWithPID(BACKWARD, 0.3, 40);
             StopDrive();
-            DriveWithPID(RIGHT, STRAFE_POWER, 700);
-            DriveWithRightDistance(RIGHT, STRAFE_POWER, R1);
+            DriveWithPID(LEFT, STRAFE_POWER, 700);
+            DriveWithLeftDistance(LEFT, STRAFE_POWER, L1);
             sleep(50);
             moveUntilBackBumper(0.25);
             turnServo(autoServoStates.GRAB, Arm1);
@@ -336,10 +335,10 @@ public class Actual_RedFull extends LinearOpMode {
             DriveWithPID(BACKWARD, 0.4, 30);
             StopDrive();
 
-            DriveWithPID(LEFT, STRAFE_POWER, 1200);
+            DriveWithPID(RIGHT, STRAFE_POWER, 1200);
             clampServo(autoServoStates.DROP, Arm2);
             turnServo(autoServoStates.GRAB, Arm2);
-            DriveWithLeftDistance(LEFT, STRAFE_POWER, L1);
+            DriveWithRightDistance(RIGHT, STRAFE_POWER, R1);
 
 //Second Stone
 
@@ -353,8 +352,8 @@ public class Actual_RedFull extends LinearOpMode {
 
             DriveWithPID(BACKWARD, 0.3, 35);
             StopDrive();
-            DriveWithPID(RIGHT, STRAFE_POWER, 700);
-            DriveWithRightDistance(RIGHT, STRAFE_POWER, R2);
+            DriveWithPID(LEFT, STRAFE_POWER, 700);
+            DriveWithLeftDistance(LEFT, STRAFE_POWER, L2);
 
             moveUntilBackBumper(0.25);
 
@@ -370,10 +369,10 @@ public class Actual_RedFull extends LinearOpMode {
             DriveWithPID(BACKWARD, 0.3, 50);
             StopDrive();
 
-            DriveWithPID(LEFT, STRAFE_POWER, 1200);
+            DriveWithPID(RIGHT, STRAFE_POWER, 1200);
             clampServo(autoServoStates.DROP, Arm3);
             turnServo(autoServoStates.GRAB, Arm3);
-            DriveWithLeftDistance(LEFT, STRAFE_POWER, L2);
+            DriveWithRightDistance(RIGHT, STRAFE_POWER, R2);
 
 //Third Stone
             DriveWithBackDistance(FORWARD, 0.3, 27, 50);
@@ -384,27 +383,27 @@ public class Actual_RedFull extends LinearOpMode {
             sleep(200);
 
             if (SkyStonePos == "Center") {
-                DriveWithPID(BACKWARD, 0.3, 56);
+                DriveWithPID(BACKWARD, 0.3, 47);
             } else {
                 DriveWithPID(BACKWARD, 0.3, 40);
             }
 
             StopDrive();
-            DriveWithPID(RIGHT, STRAFE_POWER, 700);
-            DriveWithRightDistance(RIGHT, STRAFE_POWER, R3);
+            DriveWithPID(LEFT, STRAFE_POWER, 700);
+            DriveWithLeftDistance(LEFT, STRAFE_POWER, L3);
 
             moveUntilBackBumper(0.25);
 
             turnServo(autoServoStates.GRAB, Arm3);
             turnServo(autoServoStates.GRAB, ArmNotActive);
-            sleep(400);
+            sleep(450);
             clampServo(autoServoStates.DROP, Arm3);
             sleep(250);
 
             moveUntilFrontBumper(0.6);
             StopDrive();
 
-            StartMotors(LTurn, 0.9);
+            StartMotors(RTurn, 0.9);
             sleep(300);
             StopDrive();
 
@@ -412,7 +411,7 @@ public class Actual_RedFull extends LinearOpMode {
             turnServo(autoServoStates.INIT, RIGHT);
             //clampServo(autoServoStates.INIT, LEFT);
             // clampServo(autoServoStates.INIT, RIGHT);
-            DriveWithPID(LEFT, 1, 1100);
+            DriveWithPID(RIGHT, 1, 1050);
             StopDrive();
 
         } //EMD of ifOpmodeActive
