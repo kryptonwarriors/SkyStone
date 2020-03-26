@@ -20,7 +20,7 @@ import java.io.File;
  * Odometry system calibration. Run this OpMode to generate the necessary constants to calculate the robot's global position on the field.
  * The Global Positioning Algorithm will not function and will throw an error if this program is not run first
  */
-@TeleOp(name = "Odometry System Calibration", group = "Calibration")
+@TeleOp(name = "OdometryCalibration", group = "")
 public class OdometryCalibration extends LinearOpMode {
     //Drive motors
     DcMotor RightForward, RightBack, LeftForward, LeftBack;
@@ -101,9 +101,9 @@ public class OdometryCalibration extends LinearOpMode {
         double angle = getZAngle();
 
 
-        Encoder Difference is calculated by the formula (leftEncoder - rightEncoder)
+        /*Encoder Difference is calculated by the formula (leftEncoder - rightEncoder)
         Since the left encoder is also mapped to a drive motor, the encoder value needs to be reversed with the negative sign in front
-        THIS MAY NEED TO BE CHANGED FOR EACH ROBOT
+        THIS MAY NEED TO BE CHANGED FOR EACH ROBOT*/
 
         double encoderDifference = Math.abs(verticalLeft.getCurrentPosition()) + (Math.abs(verticalRight.getCurrentPosition()));
 
@@ -185,10 +185,7 @@ public class OdometryCalibration extends LinearOpMode {
     private double getZAngle(){
         return (-imu.getAngularOrientation().firstAngle);
     }
-     @param rf power for right front motor
-     @param rb power for right back motor
-     @param lf power for left front motor
-     @param lb power for left back motor
+
 
      private void setPowerAll(double rf, double rb, double lf, double lb){
      RightForward.setPower(rf);
