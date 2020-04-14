@@ -65,6 +65,11 @@ public class GlobalCoordinatePositionUpdateSample extends LinearOpMode {
             telemetry.addData("X Position", globalPositionUpdate.returnXCoordinate() / COUNTS_PER_INCH);
             telemetry.addData("Y Position", globalPositionUpdate.returnYCoordinate() / COUNTS_PER_INCH);
             telemetry.addData("Orientation (Degrees)", globalPositionUpdate.returnOrientation());
+
+            telemetry.addData("Vertical Left Encoder Position", verticalLeft.getCurrentPosition());
+            telemetry.addData("Vertical Right Encoder Position", verticalRight.getCurrentPosition());
+            telemetry.addData("Horizontal Encoder Position", horizontal.getCurrentPosition());
+
             telemetry.addData("Thread Active", positionThread.isAlive());
             telemetry.update();
         }
