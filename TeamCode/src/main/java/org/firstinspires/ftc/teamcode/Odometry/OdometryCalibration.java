@@ -1,6 +1,5 @@
-package Odometry;
+package org.firstinspires.ftc.teamcode.Odometry;
 
-import com.google.gson.annotations.Since;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -11,19 +10,18 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.ReadWriteFile;
 
 import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
-import org.firstinspires.ftc.teamcode.R;
 
 import java.io.File;
 
 /*
- * Odometry system calibration. Run this OpMode to generate the necessary constants to calculate the robot's global position on the field.
+ * org.firstinspires.ftc.teamcode.Odometry system calibration. Run this OpMode to generate the necessary constants to calculate the robot's global position on the field.
  * The Global Positioning Algorithm will not function and will throw an error if this program is not run first
  */
 @TeleOp(name = "OdometryCalibration", group = "")
 public class OdometryCalibration extends LinearOpMode {
     //Drive motors
     DcMotor RightForward, RightBack, LeftForward, LeftBack;
-    //Odometry Wheels- Names will be changed once Odometry Wheels are Wired
+    //org.firstinspires.ftc.teamcode.Odometry Wheels- Names will be changed once org.firstinspires.ftc.teamcode.Odometry Wheels are Wired
     DcMotor verticalLeft, verticalRight, horizontal;
 
     //IMU Sensor
@@ -63,11 +61,11 @@ public class OdometryCalibration extends LinearOpMode {
         parameters.loggingTag          = "IMU";
         parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
         imu.initialize(parameters);
-        telemetry.addData("Odometry System Calibration Status", "IMU Init Complete");
+        telemetry.addData("org.firstinspires.ftc.teamcode.Odometry System Calibration Status", "IMU Init Complete");
         telemetry.clear();
 
-        //Odometry System Calibration Init Complete
-        telemetry.addData("Odometry System Calibration Status", "Init Complete");
+        //org.firstinspires.ftc.teamcode.Odometry System Calibration Init Complete
+        telemetry.addData("org.firstinspires.ftc.teamcode.Odometry System Calibration Status", "Init Complete");
         telemetry.update();
 
         waitForStart();
@@ -113,13 +111,13 @@ public class OdometryCalibration extends LinearOpMode {
         horizontalTickOffset = horizontal.getCurrentPosition()/Math.toRadians(getZAngle());
 
         //Write the constants to text files
-        //How far apart are the two vertical Odometry Wheels in Inches
+        //How far apart are the two vertical org.firstinspires.ftc.teamcode.Odometry Wheels in Inches
         ReadWriteFile.writeFile(wheelBaseSeparationFile, String.valueOf(wheelBaseSeparation));
-        //How much does Horizontal Odometry Wheel Rotate
+        //How much does Horizontal org.firstinspires.ftc.teamcode.Odometry Wheel Rotate
         ReadWriteFile.writeFile(horizontalTickOffsetFile, String.valueOf(horizontalTickOffset));
 
         while(opModeIsActive()){
-            telemetry.addData("Odometry System Calibration Status", "Calibration Complete");
+            telemetry.addData("org.firstinspires.ftc.teamcode.Odometry System Calibration Status", "Calibration Complete");
             //Display calculated constants
             telemetry.addData("Wheel Base Separation", wheelBaseSeparation);
             telemetry.addData("Horizontal Encoder Offset", horizontalTickOffset);

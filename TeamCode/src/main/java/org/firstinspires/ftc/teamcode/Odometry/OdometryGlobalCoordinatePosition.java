@@ -1,4 +1,4 @@
-package Odometry;
+package org.firstinspires.ftc.teamcode.Odometry;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ReadWriteFile;
@@ -9,7 +9,7 @@ import java.io.File;
 
 
 public class OdometryGlobalCoordinatePosition implements Runnable{
-    //Odometry wheels
+    //org.firstinspires.ftc.teamcode.Odometry wheels
     private DcMotor verticalEncoderLeft, verticalEncoderRight, horizontalEncoder;
 
     //Thead run condition
@@ -89,13 +89,17 @@ public class OdometryGlobalCoordinatePosition implements Runnable{
      * Returns the robot's global x coordinate
      * @return global x coordinate
      */
-    public double returnXCoordinate(){ return robotGlobalXCoordinatePosition; }
+    public double returnXCoordinate(){
+        return robotGlobalXCoordinatePosition;
+    }
 
     /**
      * Returns the robot's global y coordinate
      * @return global y coordinate
      */
-    public double returnYCoordinate(){ return robotGlobalYCoordinatePosition; }
+    public double returnYCoordinate(){
+        return robotGlobalYCoordinatePosition;
+    }
 
     /**
      * Returns the robot's global orientation

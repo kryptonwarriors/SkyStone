@@ -1,15 +1,15 @@
-package Odometry;
+package org.firstinspires.ftc.teamcode.Odometry;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
-@TeleOp(name = "My Odometry OpMode")
+@TeleOp(name = "My org.firstinspires.ftc.teamcode.Odometry OpMode")
 public class MyOdometryOpMode extends LinearOpMode {
     //Drive motors
     DcMotor RightForward, RightBack, LeftForward, LeftBack;
-    //Odometry Wheels
+    //org.firstinspires.ftc.teamcode.Odometry Wheels
     DcMotor verticalLeft, verticalRight, horizontal;
 
     final double COUNTS_PER_INCH = 307.699557;
